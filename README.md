@@ -1,10 +1,23 @@
 # Kollaboration with Karl
 
 ## Folder Structure
+* data - modified data files
 * documents - Quarto files and their corresponding pdfs detailing specific processes
 * exports - files (usually in Microsoft Office suite format) sent to Karl
 * figs - produced figures
+* raw-data - data files given by Karl
+* resources - 
 * tabs - produced tables
+
+## Data (`data`)
+# Modified gene expression data (`modified-WTF-IISfD-data.xlsx`)
+Karl sent a spreadsheet of lab data measuring relationship between
+concentration of either a saline (placebo) solution or Activating Factor 42 on gene expression in both Wild-Type and 101-Type cells. This is the version imported into R
+that was cleaned in Excel.
+
+# Cleaned gene expression data (`clean-gene-WTF-IISfD-data.csv`)
+Cleaned version of the modified gene expression data, including labels for cell lines. This version
+can be imported into R for plotting and further analysis.
 
 ## Documents (`documents`)
 # Data cleaning on 3/3/2023 (`2023-03-03-data-cleaning.qmd`)
@@ -40,6 +53,14 @@ to Karl on 24/3.
 # Plot adjustment on 3/4/2023 (`2023-04-03-plot-adjustment`)
 * `ge_tnr.tiff` - Figure of gene comparison plot for cell types using different treatments
 with Times New Roman font, in `.tiff` format.
+
+## Raw Data (`raw-data`)
+# Raw gene expression data (`modified-WTF-IISfD-data.xlsx`)
+Karl sent a spreadsheet of lab data measuring relationship between
+concentration of either a saline (placebo) solution or Activating Factor 42 on gene expression in both Wild-Type and 101-Type cells.
+
+## Resources (`resources`)
+* `gene_plot.pdf` - Reference figure to match for plot adjustment on 3/4.
 
 ## Tables (`tabs`)
 # Data cleaning on 3/3/2023 (`2023-03-03-data-cleaning`)
