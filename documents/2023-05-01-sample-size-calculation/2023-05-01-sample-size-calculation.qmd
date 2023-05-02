@@ -1,0 +1,52 @@
+---
+title: "Sample Size Calculation"
+author: "Athena Xiourouppa"
+format: pdf
+---
+
+The following document details the calculation for the sample size of Karl's 
+experiment. We define the variables given:
+
+```{r}
+R2 <- 0.1 # R^2 from previous experiment
+power <- 0.9 # desired power
+k <- 5 # number of regressors: concentration, cell age, treatment (two levels), 
+# cell type (two levels), and media (two levels)
+alpha <- 0.05 # significance level
+```
+
+We also install the `pwr` package:
+```{r}
+pacman::p_load(pwr)
+```
+
+To calculate sample size, $n$, using these variables, we use the following formula:
+\begin{equation}
+R^2 = \frac{kF}{n - k - 1 + kF}
+\label{eq:ncalc}
+\end{equation}
+
+where $F$ is the inverse F-statistic with $k$ and $n - k - 1$ degrees of freedom at 
+significance level $\alpha$. 
+We define $R^2$ in terms of the effect size $\mathcal{f}_2$:
+
+\begin{equation}
+R^2 = \frac{\mathcal{f}^2}{\mathcal{f}^2 + 1} \implies \mathcal{f}^2 = \frac{R^2}{1 - R^2}.
+\label{eq:R2f2}
+\end{equation}
+
+```{r}
+f2 = R2/(1-R2)
+```
+
+To solve for the parameter $n - k - 1$, and hence $n$, we use the `f2 test` in the `pwr` package. 
+```{r}
+pftest <- pwr.f2.test(u = k, v = NULL, f2 = f2, sig.level = 0.05, power = power)
+pftest
+```
+```{r}
+n <- ceiling(pftest$v + k + 1)
+n
+```
+
+Therefore, we need $n = 154$ samples.

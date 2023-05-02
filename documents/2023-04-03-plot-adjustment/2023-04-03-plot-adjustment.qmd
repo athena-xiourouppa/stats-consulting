@@ -1,0 +1,112 @@
+---
+title: "Plot Adjustment for Gene Expression"
+author: "Athena Xiourouppa"
+format: pdf
+---
+
+The following document generates a plot of gene expression vs concentration for 
+activating factor 42 and the placebo on the gene expression data sent on 24/3.
+
+First, we read in the cleaned data frame from our previous work:
+```{r}
+# Load necessary packages
+pacman::p_load(tidyverse, readxl, reshape2, stringr, viridis, gt, webshot2, patchwork,
+               latex2exp, ggrepel)
+```
+
+```{r}
+# Read in cleaned data
+clean_gene <- read.csv(here::here("data", "clean-gene-WTF-IISfD-data.csv"))
+```
+
+We select only the first concentration vector and gene expression values:
+```{r}
+cols <- c("gene_expression", "X")
+geX <- unique(grep(paste(cols, collapse="|"), names(clean_gene), value=TRUE))
+clean_gene <-
+  clean_gene |> 
+  mutate(X = clean_gene$X - 1) |> # Use X as concentration
+  select(all_of(geX)) |> # Select only gene expression and X
+  melt(id = "X") |> 
+  mutate(cell = ifelse(str_detect(variable, "WT"), "Wild Type", "Cell-type 101")) |> 
+  mutate(trt = ifelse(str_detect(variable, "P"), "Placebo", "Activating factor 42")) |> 
+  mutate(gl = str_match(variable, "GL.\\s*(.*?)\\s*\\.")[,2])
+```
+
+We then plot the two trials for each treatment in Wild-Type cells.
+```{r}
+ravenclaw_cols <- alpha(c(harrypotter::hp_palettes$ravenclaw[2],
+                    harrypotter::hp_palettes$ravenclaw2[3]), 0.8)
+p_wt <- clean_gene |> 
+  filter(cell == "Wild Type") |> 
+  ggplot(aes(x=X, y=value, fill=trt, label = ifelse(X==10, as.character(gl),''))) +
+  geom_point(color='black', size=3, shape=21) + 
+  geom_label_repel(nudge_x = 1,
+                   direction = "y",
+                   hjust = 0,
+                   min.segment.length = 0,
+                   family = "Times New Roman",
+                   show.legend = FALSE) +
+  scale_fill_manual(values = ravenclaw_cols) +
+  labs(x = TeX(r"(\mu\g/mL)"),
+       y = "Gene Expression",
+       fill = "Treatment") +
+  theme_bw() +
+  scale_x_continuous(breaks=0:10,
+                     limits=c(0,11)) +
+  theme(text = element_text(family = "Times New Roman", size=10),
+        legend.key = element_rect(fill="white")) +
+  guides(fill = guide_legend(override.aes = list(label = ""))) +
+  theme(legend.position="bottom") +
+  ggtitle("Wild-type")
+p_wt
+```
+
+We repeat the process for cell-type 101:
+```{r}
+p_101 <- clean_gene |> 
+  filter(cell == "Cell-type 101") |> 
+  ggplot(aes(x=X, y=value, fill=trt, label = ifelse(X==10, as.character(gl),''))) +
+  geom_point(color='black', size=3, shape=21) + 
+  geom_label_repel(nudge_x = 1,
+                   direction = "y",
+                   hjust = 0,
+                   min.segment.length = 0,
+                   family = "Times New Roman",
+                   show.legend = FALSE) +
+  scale_fill_manual(values = ravenclaw_cols) +
+  labs(x = TeX(r"(\mu\g/mL)"),
+       y = "Gene Expression",
+       fill = "Treatment") +
+  theme_bw() +
+  scale_x_continuous(breaks=0:10,limits=c(0,11)) +
+  theme(text = element_text(family = "Times New Roman", size=10),
+        legend.key = element_rect(fill="white")) +
+  guides(fill = guide_legend(override.aes = list(label = "",
+                                                col = "black"))) +
+  theme(legend.position="bottom") +
+  ggtitle("Cell-type 101")
+p_101
+```
+
+
+We then combine the plots:
+```{r}
+p_cells <- p_wt + p_101 + 
+  plot_annotation(tag_levels = 'A') +
+  plot_layout(guides = "collect") & 
+  theme(legend.position="bottom",
+        legend.key = element_rect(fill="white")) 
+p_cells
+```
+
+Finally, we export the graph as a `.tiff` file as requested:
+```{r}
+ggsave(filename=here::here("figs", "ge_tnr.tiff"),
+       plot = p_cells,
+       units = "in",
+       width = 9,
+       height = 6,
+       dpi = 500)
+```
+
