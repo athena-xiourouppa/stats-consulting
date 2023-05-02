@@ -52,7 +52,7 @@ to Karl on 24/3.
     
 # Plot adjustment on 3/4/2023 (`2023-04-03-plot-adjustment`)
 * `ge_tnr.tiff` - Figure of gene comparison plot for cell types using different treatments
-with Times New Roman font, in `.tiff` format.
+with Times New Roman font, in `.tiff` format. (not included due to large file size)
 
 ## Raw Data (`raw-data`)
 # Raw gene expression data (`modified-WTF-IISfD-data.xlsx`)
