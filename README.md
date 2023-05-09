@@ -59,7 +59,7 @@ to Karl on 24/3.
 with Times New Roman font, in `.tiff` format. (not included due to large file size)
 
 ## Raw Data (`raw-data`)
-# Raw gene expression data (`modified-WTF-IISfD-data.xlsx`)
+## Raw gene expression data (`modified-WTF-IISfD-data.xlsx`)
 Karl sent a spreadsheet of lab data measuring relationship between
 concentration of either a saline (placebo) solution or Activating Factor 42 on gene expression in both Wild-Type and 101-Type cells.
 
