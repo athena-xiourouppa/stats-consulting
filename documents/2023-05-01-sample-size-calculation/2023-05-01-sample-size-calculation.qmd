@@ -10,8 +10,8 @@ experiment. We define the variables given:
 ```{r}
 R2 <- 0.1 # R^2 from previous experiment
 power <- 0.9 # desired power
-k <- 5 # number of regressors: concentration, cell age, treatment (two levels), 
-# cell type (two levels), and media (two levels)
+k <- 5 # number of regressors: concentration, cell age
+# , treatment (two levels), cell type (two levels), and media (two levels)
 alpha <- 0.05 # significance level
 ```
 
