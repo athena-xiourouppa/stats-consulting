@@ -1,0 +1,11 @@
+---
+title: "A Predictive Model for Gene Expression"
+author: "Athena Xiourouppa"
+format: pdf
+---
+
+# Introduction
+# Methods
+# Results
+# Discussion
+
