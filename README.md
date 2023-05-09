@@ -34,7 +34,7 @@ font and formatted it as a `.tiff` file.
 We calculated a sample size for Karl's experiment grant based on $R^2$, power, and
 significance level desired.
 
-# Analysis report on 8/5/2023 (`2023-05-08-gene-expression-report.qmd`)
+### Analysis report on 8/5/2023 (`2023-05-08-gene-expression-report.qmd`)
 We wrote a report describing a predictive model for gene expression based on the 
 previous analyses performed.
 
