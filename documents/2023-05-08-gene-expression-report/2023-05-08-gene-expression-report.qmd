@@ -1,11 +1,16 @@
 ---
-title: "A Predictive Model for Gene Expression"
+title: "A Predictive Model for the Effect of Activating Factor 42 on Gene Expression in Wild-Type and 101-Type Cells"
 author: "Athena Xiourouppa"
 format: pdf
 ---
 
 # Introduction
+
 # Methods
+Eight trials were performed in total. For each cell type (wild and 101), both the placebo (saline) 
+solution and Activating Factor 42 were tested in concentrations up to 10 mg/mL. Two 
+trials were performed for each concentration level.
+
 # Results
 # Discussion
 
