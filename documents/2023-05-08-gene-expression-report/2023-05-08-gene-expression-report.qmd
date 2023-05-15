@@ -2,15 +2,41 @@
 title: "A Predictive Model for the Effect of Activating Factor 42 on Gene Expression in Wild-Type and 101-Type Cells"
 author: "Athena Xiourouppa"
 format: pdf
+bibliography: references.bib
 ---
 
 # Introduction
 
+% Data set and research question
+
 # Methods
+## Cleaning
+
+% Cite R packages with citation() and use [@key] to cite
+
+## Pre-processing
+## Choice of Model
+## Tuning of Model
+
 Eight trials were performed in total. For each cell type (wild and 101), both the placebo (saline) 
 solution and Activating Factor 42 were tested in concentrations up to 10 mg/mL. Two 
 trials were performed for each concentration level.
 
 # Results
+
+% Include mean summary table for WT and 101T cells, line graphs of placebo vs A42 on each cell type
+
 # Discussion
 
+% Discuss results in context of research question
+
+# Bibliograhy
+
+# Appendix
+```{r ref.label=knitr::all_labels()}
+#| eval: false
+pacman::p_load(tidyverse, targets, lubridate, gt)
+theme_set(theme_bw())
+# "Quarto file"
+bibliography: references.bib
+```
