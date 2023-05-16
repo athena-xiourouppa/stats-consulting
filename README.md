@@ -19,6 +19,9 @@ that was cleaned in Excel.
 Cleaned version of the modified gene expression data, including labels for cell lines. This version
 can be imported into R for plotting and further analysis.
 
+### Melted gene expression data (`melted-gene-WTF-IISfD-data.csv`)
+Melted version of the above into a single tibble.
+
 ## Documents (`documents`)
 ### Data cleaning on 3/3/2023 (`2023-03-03-data-cleaning.qmd`)
 We cleaned `modified-WTF-IISfD-data.xlsx` in Excel, 
@@ -35,8 +38,12 @@ We calculated a sample size for Karl's experiment grant based on $R^2$, power, a
 significance level desired.
 
 ### Analysis report on 8/5/2023 (`2023-05-08-gene-expression-report.qmd`)
-We wrote a report describing a predictive model for gene expression based on the 
+We wrote a report describing a mixed effects model for gene expression based on the 
 previous analyses performed.
+
+### Mixed Effects report on 16/5/2023 (`2023-05-08-mixed-effects.qmd`)
+We created a predictive mixed-effects model for gene expression using the cleaned 
+data.
 
 ## Exports (`exports`)
 ### Gene expression presentation (`gene_expression_data.pptx`)

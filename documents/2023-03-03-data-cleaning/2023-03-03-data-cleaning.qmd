@@ -55,11 +55,18 @@ wtf_iisfd$`WT-A42-2`$gene_expression[6] <- mean(wtf_iisfd$`WT-A42-2`$gene_expres
                                                 na.rm=TRUE)
 ```
 
-We save the cleaned data as a `.csv` with the gene line inclusive names, for future use:
+We save the cleaned data as a `.csv` with the gene line inclusive names, for future use, in two forms. Firstly, as a series of tibbles:
 ```{r}
 grouped_trials_genes <- wtf_iisfd
 names(grouped_trials_genes) <- better_names_gene
 write.csv(grouped_trials_genes, here::here("data","clean-gene-WTF-IISfD-data.csv"))
+```
+
+Then, as a melted, singular tibble:
+```{r}
+melted_genes <- grouped_trials_genes |> 
+  melt(id = "conc")
+write.csv(melted_genes, here::here("data", "melted-gene-WTF--IISfD-data.csv"))
 ```
 
 Since we are summarising and there are two trials per cell line and treatment, we merge the separated trial tibbles and take an average of gene expression for every concentration:
