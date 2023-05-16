@@ -1,0 +1,17 @@
+---
+title: "Mixed Effects Model"
+author: "Athena Xiourouppa"
+format: pdf
+---
+
+The following document details the development of a predictive mixed-effects model for 
+gene expression data.
+
+# Load packages and data
+```{r}
+pacman::p_load(tidyverse, glmnet, lme4)
+genes <- read.csv(here::here("data", "clean-gene-WTF-IISfD-data.csv"))
+head(genes)
+```
+
+% use lmer and look at textbook
