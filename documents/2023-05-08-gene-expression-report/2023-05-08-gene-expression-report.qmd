@@ -1,5 +1,5 @@
 ---
-title: "A Predictive Model for the Effect of Activating Factor 42 on Gene Expression in Wild-Type and 101-Type Cells"
+title: "A Mixed-Effects Model for the Effect of Activating Factor 42 on Gene Expression in Wild-Type and 101-Type Cells"
 author: "Athena Xiourouppa"
 format: pdf
 bibliography: references.bib
