@@ -62,11 +62,39 @@ names(grouped_trials_genes) <- better_names_gene
 write.csv(grouped_trials_genes, here::here("data","clean-gene-WTF-IISfD-data.csv"))
 ```
 
-Then, as a melted, singular tibble:
+Then, as a melted, singular tibble, where `L1` is the label of the gene type, cell type, activating factor, and trial number.
 ```{r}
 melted_genes <- grouped_trials_genes |> 
   melt(id = "conc")
-write.csv(melted_genes, here::here("data", "melted-gene-WTF--IISfD-data.csv"))
+```
+
+We further split `L1` into separate columns and save the labels as new columns:
+```{r}
+gene_line <- c()
+cell_type <- c()
+activating_factor <- c()
+trial_number <- c()
+
+for(i in 1:nrow(melted_genes)){
+  split_label <- str_split(melted_genes[i, ]$L1, "-")[[1]]
+  gene_line[i] <- split_label[2]
+  cell_type[i] <- split_label[3]
+  activating_factor[i] <- split_label[4]
+  trial_number[i] <- split_label[5]
+}
+
+melted_genes <- melted_genes |> 
+  select(-c(L1, variable)) |> 
+  rename(gene_expression = value) |> 
+  mutate(gene_line = gene_line,
+         cell_type = cell_type,
+         activating_factor = activating_factor,
+         trial_number = trial_number)
+```
+
+Finally, we save this melted tibble as a `.csv` file for future use:
+```{r}
+write.csv(melted_genes, here::here("data", "melted-gene-WTF-IISfD-data.csv"))
 ```
 
 Since we are summarising and there are two trials per cell line and treatment, we merge the separated trial tibbles and take an average of gene expression for every concentration:

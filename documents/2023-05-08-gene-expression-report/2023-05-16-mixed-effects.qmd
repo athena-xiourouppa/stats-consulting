@@ -9,9 +9,60 @@ gene expression data.
 
 # Load packages and data
 ```{r}
-pacman::p_load(tidyverse, glmnet, lme4)
-genes <- read.csv(here::here("data", "clean-gene-WTF-IISfD-data.csv"))
+pacman::p_load(tidyverse, glmnet, lme4, ggrepel)
+genes <- read.csv(here::here("data", "melted-gene-WTF-IISfD-data.csv"))
 head(genes)
 ```
 
-% use lmer and look at textbook
+# Fit random effects models
+```{r}
+cell_lm <- lmer(gene_expression ~  conc + (1 | cell_type) + activating_factor, data=genes)
+summary(cell_lm)
+```
+
+```{r}
+plot(cell_lm)
+```
+
+```{r}
+af_lm <- lmer(gene_expression ~ conc + (1 | activating_factor) + cell_type, data=genes)
+summary(af_lm)
+```
+
+```{r}
+plot(af_lm)
+```
+
+
+```{r}
+cell_af_lm <- lmer(gene_expression ~ 1 + conc +  (1 | cell_type) +  (1 | activating_factor), data=genes)
+summary(cell_af_lm)
+```
+
+
+```{r}
+plot(cell_af_lm)
+```
+
+
+```{r}
+AIC(cell_lm, af_lm, cell_af_lm)
+```
+
+
+```{r}
+genes |> 
+  ggplot(aes(x=conc, y=gene_expression, color=activating_factor, 
+             label=ifelse(conc==10, as.character(gene_line),''))) +
+  geom_point() +
+  geom_label_repel(nudge_x = 1,
+                 direction = "y",
+                 hjust = 0,
+                 min.segment.length = 0,
+                 family = "Times New Roman",
+                 show.legend = FALSE) +
+  geom_line(aes(y=predict(cell_lm))) +
+  facet_wrap(~ cell_type)
+```
+
+
