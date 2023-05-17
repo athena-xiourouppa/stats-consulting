@@ -19,7 +19,6 @@ head(genes)
 
 # Fit random effects models
 We have four main variables to consider as predictors for gene expression: gene line, cell type, activating factor, all of which are categorical, and concentration of activating factor, which is numeric. 
-
 The gene line is effectively an identifier for each trial, so without multiple trials per gene line, we cannot use effectively interpret it as a predictor. 
 
 We will test various models that use different predictors as a random intercept model.

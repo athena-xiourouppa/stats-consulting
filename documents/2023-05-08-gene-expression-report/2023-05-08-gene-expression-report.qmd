@@ -6,25 +6,62 @@ bibliography: references.bib
 ---
 
 # Introduction
+The given dataset consists of 88 total observations of gene expression: 11 concentration levels 
+from 0-10 mg/mL of 2 different treatments (Activating Factor 42 or Placebo) 
+on 2 different cell types (101-Type or Wild-Type), with 
+2 replications. Each set of 11 data points is labelled by the cell's gene line. 
 
-% Data set and research question
+We wish to develop a predictive model for the gene expression by investigating the 
+effects of the predictors
+gene line, cell type, treatment, all of which are categorical, and concentration of 
+treatment, which is numeric and measured in milligrams per millilitre.
 
 # Methods
 ## Cleaning
+The data was provided as an Excel spreadsheet, which required some cleaning before 
+being imported into RStudio[^1]. We did the following in Excel:
 
-% Cite R packages with citation() and use [@key] to cite
+* Deleted the figures on pages `GL-CsE` and `GL-bNo`
+* Removed the summary statistics on page `GL-CsE`
+* Shifted data cells to top-left corner to avoid blank rows when reading into R
+* Made cell line and treatment type names consistent
+* Removed cell line and treatment type names from spreadsheet and copied separately. 
+From there, we saved this as a new spreadsheet.
+
+To import and analyse the data in R [@r2022], we used the packages `tidyverse` [@tidy2019],
+`readxl` [@xl2023], `reshape2` [@reshape2007], and `gt` [@gt2023] to work with tibbles, import an Excel spreadsheet, melt tibbles, and create tables, respectively. 
+
+Firstly, we obtained the names of each of the eight cleaned spreadsheets via the 
+`excel_sheets` function. We then used `lapply` to save each individual sheet as a tibble 
+and applied the corresponding name to each one. To keep track of the parameters used in 
+each experiment, we then renamed the sheets so they had the format "GL-[Gene Line]-[Cell Type]-[Treatment]-[Trial]". The term 'Trial' is used loosely here to refer to experiments with the
+same treatment and cell type, but the gene lines in these cases still differ, so they are 
+not true replications.
+
+There was a missing value in the JZC gene line trial, which we imputed with the mean value 
+of the remaining ten values. Finally, we saved a cleaned version of the data as a `.csv` file 
+for future use.
+
+[^1]: https://www.rstudio.com
 
 ## Pre-processing
+We melted the cleaned tibble by the concentration variable and then split the label 
+into its four components by hyphen, such that the gene line, cell type, treatment type, and 
+trial number had separate columns. This was then saved as an additional `.csv` file.
+
 ## Choice of Model
+Four models were considered in total, all of which used cell type, treatment type, and 
+concentration of treatment as predictors. The gene line is effectively an identifier for each trial, so without multiple trials per gene line, we cannot use effectively interpret it as a predictor. 
+
+The first model varied the intercept by cell type, the second by activating factor or treatment type, and 
+the third by both independently. All of these failed to meet the assumption of homoscedasticity, 
+but the cell type model had the lowest AIC value, so we chose to further modify it. By allowing the 
+concentration, which affects slope, to vary by the type of treatment, we obtained a fourth model 
+which had a much lower AIC, and better met our assumption.
+
 ## Tuning of Model
 
-Eight trials were performed in total. For each cell type (wild and 101), both the placebo (saline) 
-solution and Activating Factor 42 were tested in concentrations up to 10 mg/mL. Two 
-trials were performed for each concentration level.
-
 # Results
-
-% Include mean summary table for WT and 101T cells, line graphs of placebo vs A42 on each cell type
 
 # Discussion
 

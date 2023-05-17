@@ -21,7 +21,7 @@ Before importing the spreadsheet into R, we:
 We now read the spreadsheet `modified-WTF-IISfD data.xlsx` under `data` into R:
 ```{r, results=FALSE}
 # Load necessary packages
-pacman::p_load(tidyverse, readxl, reshape2, stringr, viridis, gt, webshot2)
+pacman::p_load(tidyverse, readxl, reshape2, gt)
 
 # Obtain names of sheets
 sheet_names <- excel_sheets(here::here("data/modified-WTF-IISfD-data.xlsx"))
