@@ -5,6 +5,11 @@ format: pdf
 bibliography: references.bib
 ---
 
+```{r, echo=FALSE}
+pacman::p_load(tidyverse, gt)
+knitr::opts_chunk$set(fig.pos = 'H')
+```
+
 # Introduction
 The given dataset consists of 88 total observations of gene expression: 11 concentration levels 
 from 0-10 mg/mL of 2 different treatments (Activating Factor 42 or Placebo) 
@@ -29,7 +34,9 @@ being imported into RStudio[^1]. We did the following in Excel:
 From there, we saved this as a new spreadsheet.
 
 To import and analyse the data in R [@r2022], we used the packages `tidyverse` [@tidy2019],
-`readxl` [@xl2023], `reshape2` [@reshape2007], and `gt` [@gt2023] to work with tibbles, import an Excel spreadsheet, melt tibbles, and create tables, respectively. 
+`readxl` [@xl2023], `reshape2` [@reshape2007], `gt` [@gt2023], `lme4` [@lme2015], 
+`ggrepel` [@ggrep2023], `paletteer` [@pale2021], and `vip` [@vip2020] 
+to work with tibbles, import an Excel spreadsheet, melt tibbles, create tables, create mixed effects models, label plots, colour plots, and obtain model metrics, respectively. 
 
 Firstly, we obtained the names of each of the eight cleaned spreadsheets via the 
 `excel_sheets` function. We then used `lapply` to save each individual sheet as a tibble 
@@ -46,34 +53,77 @@ for future use.
 
 ## Pre-processing
 We melted the cleaned tibble by the concentration variable and then split the label 
-into its four components by hyphen, such that the gene line, cell type, treatment type, and 
+into its four components by hyphen, using the `str_split` function, 
+such that the gene line, cell type, treatment type, and 
 trial number had separate columns. This was then saved as an additional `.csv` file.
 
 ## Choice of Model
 Four models were considered in total, all of which used cell type, treatment type, and 
-concentration of treatment as predictors. The gene line is effectively an identifier for each trial, so without multiple trials per gene line, we cannot use effectively interpret it as a predictor. 
+concentration of treatment as predictors. The gene line is effectively an identifier for each trial, so without multiple trials per gene line, we cannot use effectively interpret it as a predictor. We used
+the `lme4` package to fit models and check assumption plots.
 
 The first model varied the intercept by cell type, the second by activating factor or treatment type, and 
-the third by both independently. All of these failed to meet the assumption of homoscedasticity, 
-but the cell type model had the lowest AIC value, so we chose to further modify it. By allowing the 
-concentration, which affects slope, to vary by the type of treatment, we obtained a fourth model 
-which had a much lower AIC, and better met our assumption.
+the third by both independently. We compared these three models by their assumption plot and AIC. All of these failed to meet the assumption of homoscedasticity, but the cell type model had the lowest AIC value, so we chose to further modify it. By allowing the concentration, which affects slope, to vary by the type of treatment, we obtained a fourth model which had a much lower AIC, and better met our assumption.
 
-## Tuning of Model
+We also compared the $R^2$ and Root Mean Square Error (RMSE) of the models using the `vip` package.
 
 # Results
+@tbl-comp shows the comparison of the $R^2$ metric and Root Mean Square Error (RMSE) metric for our four models. We have chosen the model that minimises the RMSE and maximises the $R^2$ indicating a good fit to our data.
+```{r, echo=FALSE}
+#| label: tbl-comp
+#| tbl-cap: Quantitative metrics for the four models. We see that the chosen model, "Cell Intercept and Treatment Slope" has the lowest error and highest $R^2$ value. We also notice that the three models with only a varied intercept but not a varied slope have very similar values of these metrics, but the remaining model makes a significant improvement.
+RMSE <- c(4.428235, 4.426161, 4.428354, 3.267196)
+R2 <- c(0.8303221, 0.8304817, 0.8303269, 0.9076429)
+models <- c("Cell Intercept", "Treatment Intercept", 
+            "Cell and Treatment Intercept", "Cell Intercept and Treatment Slope")
+model_comp <- tibble(Model=models, RMSE=RMSE, R2=R2)
+names(model_comp) <- c("Model", "RMSE", "R2")
+
+model_comp |> 
+  gt() |> 
+  fmt_number(decimals=4)
+```
+
+@fig-plot shows the fit of the linear mixed effect model to the data, separated by cell type.
+```{r, echo=FALSE}
+#| label: fig-plot
+#| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by subplot and colour, respectively. We have also labelled the gene lines at their final observations. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, where the placebo treatment fits well but the Activating Factor 42 treatment does not. The gene lines of xpo and Rza seem to grow in distance above 4 mg/mL.
+knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model-plot.png"), dpi=400)
+```
+
+@fig-model shows the coefficients of our final model.
+```{r, echo=FALSE}
+#| label: fig-model
+#| layout-ncol: 2
+#| fig-cap: Coefficients of the chosen model.
+#| fig-subcap: 
+#|   - "We see that 101 Type cells have a higher intercept than Wild Type cells indicating that these cells have higher gene expression."
+#|   - We also see that Activating Factor 42 similarly has a higher intercept than placebo treatment, almost by a factor of 2. Likewise, the slope increases when Activating Factor 42 is applied, indicating that this increases gene expression.
+
+knitr::include_graphics(here::here("tabs/2023-05-08-mixed-effects/cell-coefficients.png"))
+knitr::include_graphics(here::here("tabs/2023-05-08-mixed-effects/af-coefficients.png"))
+```
+
+@fig-assumptions shows the assumption checking for our final model. We see that there is some
+fanning of the residuals, indicating minor heteroscedasticity, but in comparison with the previous 
+models this was a significant improvement.
+
+```{r, echo=FALSE}
+#| label: fig-assumptions
+#| fig-cap: Residuals versus fitted plot for the final model, which varies intercept by cell type and slope by treatment type. There is some mild heteroscedasticity of the residuals, indicating that this assumption of linear modelling has not entirely been fulfilled.
+#| width: 50%
+knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.pdf"), 
+                        dpi=4)
+```
 
 # Discussion
+effect of concentration
+effect oc ell type
+effect of activating factor
+gene line?
+explain metrics
 
-% Discuss results in context of research question
 
 # Bibliograhy
 
-# Appendix
-```{r ref.label=knitr::all_labels()}
-#| eval: false
-pacman::p_load(tidyverse, targets, lubridate, gt)
-theme_set(theme_bw())
-# "Quarto file"
-bibliography: references.bib
-```
+
