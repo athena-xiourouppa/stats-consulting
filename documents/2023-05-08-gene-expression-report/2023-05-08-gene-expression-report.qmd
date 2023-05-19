@@ -117,12 +117,22 @@ knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model4-assumpt
 ```
 
 # Discussion
-effect of concentration
-effect oc ell type
-effect of activating factor
-gene line?
-explain metrics
+We see that Wild Type and 101 Type cells have varied gene expression on average, so 
+by accounting for this in the intercept term, we can more accurately measure the relative change 
+in gene expression as a treatment is applied. From @fig-plot and @fig-model we see that 101 Type cells have greater base-line gene expression. We could further refine this by gene line, but that would
+require multiple experiments per gene line, rather than just type and treatment combination to 
+more solidly conclude trends.
 
+In regards to the slope, we see that as concentration of the applied treatment increases, the 
+gene expression also increases. We have varied the slope by treatment type, and see that for 
+an increase of 1 mg/mL, gene expression is nearly tripled when Activating Factor 42 is used over 
+the placebo. 
+
+The chosen model has an RMSE of approximately $3.267$ gene expression units, which is smaller than the 
+mean gene expression of $17.53$, and a high $R^2$ value of $90.76\%$, meaning just under $91\%$ of the 
+variation in gene expression is explained by our model. To further justify the validity of the model, 
+error bounds on the equipment used to measure gene expression should be provided so they can be 
+accounted for by the model.
 
 # Bibliograhy
 
