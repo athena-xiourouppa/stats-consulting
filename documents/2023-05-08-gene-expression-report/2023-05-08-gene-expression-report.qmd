@@ -112,7 +112,7 @@ models this was a significant improvement.
 #| label: fig-assumptions
 #| fig-cap: Residuals versus fitted plot for the final model, which varies intercept by cell type and slope by treatment type. There is some mild heteroscedasticity of the residuals, indicating that this assumption of linear modelling has not entirely been fulfilled.
 #| width: 50%
-knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.pdf"), 
+knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.png"), 
                         dpi=4)
 ```
 
