@@ -86,7 +86,7 @@ Figure @fig-clsm shows the assumption checking for this model.
 ```{r}
 #| label: fig-clsm
 #| fig-cap: Residuals vs fitted for the model using cell type to vary the intercept and activating factor to vary the slope. While it still shows some fanning, it meets our assumption of homoscedasticity more effectively.
-png(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.png")) 
+pdf(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.pdf")) 
 plot(cell_slope_lm)
 dev.off()
 ```
@@ -120,7 +120,7 @@ genes |>
   theme(legend.position="bottom") +
   paletteer::scale_color_paletteer_d("tvthemes::rickAndMorty",
                                      labels=c("Activating Factor 42", "Placebo"))
-ggsave(here::here("figs/2023-05-08-mixed-effects/model-plot.png"))
+ggsave(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"))
 ```
 Finally, we compute the quantitative metrics for the models by creating a function to calculate 
 the RMSE and $R^2$ value, and running it on each model:

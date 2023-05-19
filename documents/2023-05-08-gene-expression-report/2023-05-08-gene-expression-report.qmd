@@ -88,7 +88,8 @@ model_comp |>
 ```{r, echo=FALSE}
 #| label: fig-plot
 #| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by subplot and colour, respectively. We have also labelled the gene lines at their final observations. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, where the placebo treatment fits well but the Activating Factor 42 treatment does not. The gene lines of xpo and Rza seem to grow in distance above 4 mg/mL.
-knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model-plot.png"), dpi=400)
+#| width: 80%
+knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"), dpi=400)
 ```
 
 @fig-model shows the coefficients of our final model.
@@ -111,9 +112,9 @@ models this was a significant improvement.
 ```{r, echo=FALSE}
 #| label: fig-assumptions
 #| fig-cap: Residuals versus fitted plot for the final model, which varies intercept by cell type and slope by treatment type. There is some mild heteroscedasticity of the residuals, indicating that this assumption of linear modelling has not entirely been fulfilled.
-#| width: 50%
-knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.png"), 
-                        dpi=4)
+#| width: 80%
+knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.pdf"), 
+                        dpi=100)
 ```
 
 # Discussion
