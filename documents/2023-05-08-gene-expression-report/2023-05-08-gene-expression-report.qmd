@@ -65,7 +65,7 @@ concentration of treatment.
 
 ```{r, echo=FALSE}
 #| label: fig-eda
-#| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points.
+#| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value of gene expression. Experiments that used Activating Factor 42 have a higher slope value, and therefore gene expression. We have also labelled the gene line for each set of eleven points.
 knitr::include_graphics(here::here("figs", 
                                    "2023-05-08-mixed-effects/model-eda.pdf"))
 ```
