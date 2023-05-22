@@ -19,110 +19,133 @@ head(genes)
 ```
 
 # Fit random effects models
-We have four main variables to consider as predictors for gene expression: gene line, cell type, activating factor, all of which are categorical, and concentration of activating factor, which is numeric. 
-The gene line is effectively an identifier for each trial, so without multiple trials per gene line, we cannot use effectively interpret it as a predictor. 
+We have four main variables to consider as predictors for gene expression: gene line, cell type, treatment, all of which are categorical, and concentration of activating factor, which is numeric.
 
-We will test various models that use different predictors as a random intercept model.
+The gene line can be considered as a random effect, since there is slight variation between each 
+experiment, but without multiple trials per gene line, we cannot use effectively interpret it as a predictor. 
 
-## Model 1: Varying Intercept By Cell Type
-Our first model uses the type of cell (wild or 101) as a random effect on the starting intercept with concentration of activating factor and type of activating factor as predictors.
-```{r}
-cell_lm <- lmer(gene_expression ~  
-                  conc + activating_factor + (1 | cell_type), data=genes)
-summary(cell_lm)
-```
-Figure @fig-celllm shows the assumption checking for the model.
-```{r}
-#| fig-cap: The residuals vs fitted plot for the first model. We see that there is some curvature about the zero-line, indicating poor homoscedasticity. 
-#| label: fig-celllm
-plot(cell_lm)
-```
-## Model 2: Varying Intercept By Activating Factor Type
-Our next model uses the activating factor (placebo or 42) as a random effect on the starting intercept with concentration of activating factor and cell type as predictors.
-```{r}
-af_lm <- lmer(gene_expression ~ 
-                conc + cell_type + (1 | activating_factor), data=genes)
-summary(af_lm)
-```
-Figure @fig-aflm shows the assumption checking for the second model.
-```{r}
-#| label: fig-aflm
-#| fig-cap: Residuals vs fitted plot for the second model. Again, we see similar levels of heteroscedasticity as the first model.
-plot(af_lm)
-```
+We will test various models that use different interactions between the remaining three variables.
 
-## Model 3: Varying Intercept By Activating Factor Type and Cell Type
-Our next model uses the activating factor and cell type as random effects on the starting intercept with concentration as a remaining predictor affecting the slope.
-```{r}
-cell_af_lm <- lmer(gene_expression ~ 
-                     conc +  (1 | cell_type) +  (1 | activating_factor),
-                   data=genes)
-summary(cell_af_lm)
-```
-
-Figure @fig-calm shows the assumption checking for this model.
-```{r}
-#| label: fig-calm
-#| fig-cap: Residuals vs fitted for the model using two factors to vary the intercept. It similarly does not meet the assumption of homoscedasticity as the previous two models.
-plot(cell_af_lm)
-```
-Although none of the models meet our assumptions, before we test further models, we will start by looking at the AIC values:
+Figure @fig-eda shows the data from each gene line separated by cell type and treatment type. We see significant differences in the intercepts between the two subplots, indicating that we should consider all three remaining variables as predictors:
 
 ```{r}
-AIC(cell_lm, af_lm, cell_af_lm)
-```
-
-We notice that the AIC values are similar, but the cell-type-varied intercept model is the lowest, so we will adapt this further.
-
-## Model 4: Varying Intercept by Cell Type and Slope by Activating Factor
-Since the concentration is directly correlated with the activating factor, we will test an intercept varied by cell type, along with a slope varied by activating_factor:
-```{r}
-cell_slope_lm <- lmer(gene_expression ~ 
-                        (1 | cell_type) + (conc | activating_factor), 
-                      data=genes)
-summary(cell_slope_lm)
-```
-Figure @fig-clsm shows the assumption checking for this model.
-```{r}
-#| label: fig-clsm
-#| fig-cap: Residuals vs fitted for the model using cell type to vary the intercept and activating factor to vary the slope. While it still shows some fanning, it meets our assumption of homoscedasticity more effectively.
-pdf(here::here("figs/2023-05-08-mixed-effects/model4-assumptions.pdf")) 
-plot(cell_slope_lm)
-dev.off()
-```
-To check this model is a better fit, we compare the AIC again, which demonstrates that this model is much more effective.
-```{r}
-AIC(cell_lm, cell_slope_lm)
-```
-
-To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-csplot:
-```{r}
-#| label: fig-csplot
+#| label: fig-eda
 #| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points.
 
-cell_type.labs <- c("101 Type Cell", "Wild Type Cell")
-names(cell_type.labs) <- c("C101", "WT")
-
 genes |> 
-  ggplot(aes(x=conc, y=gene_expression, color=activating_factor, 
+  ggplot(aes(x=conc, y=gene_expression, color=treatment,
              label=ifelse(conc==10, as.character(gene_line),''))) +
   geom_point() +
   geom_label_repel(nudge_x = 2,
                  direction = "y",
                  show.legend = FALSE) +
-  geom_line(aes(y=predict(cell_slope_lm))) +
-  facet_wrap(~ cell_type, scales="free", 
+  facet_wrap(~ cell_type, scales="free",
              labeller = labeller(cell_type = cell_type.labs)) +
   labs(x = "Concentration (mg/mL)",
        y = "Gene Expression",
-       color = "Activating Factor",
+       color = "Treatment",
        label = "Gene Line") +
   theme(legend.position="bottom") +
   paletteer::scale_color_paletteer_d("tvthemes::rickAndMorty",
                                      labels=c("Activating Factor 42", "Placebo"))
-ggsave(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"))
+ggsave(here::here("figs/2023-05-08-mixed-effects/model-eda.pdf"))
 ```
-Finally, we compute the quantitative metrics for the models by creating a function to calculate 
+
+## Model 1: No Interaction
+Our first model uses gene line as a random intercept effect, with three predictors of 
+concentration, treatment, and cell type.
+```{r}
+m1 <- lmer(gene_expression ~ 
+             conc + treatment + cell_type + (1 | gene_line),
+           data = genes)
+summary(m1)
+```
+
+Figure @fig-m1 shows the assumption checking for the model.
+```{r}
+#| fig-cap: The residuals vs fitted plot for the first model. We see that there is curvature about the zero-line, indicating poor homoscedasticity. 
+#| label: fig-m1
+plot(m1)
+```
+
+## Model 2: Concentration x Treatment
+Our second model creates interaction between concentration of treatment and treatment type, 
+but is otherwise identical to the first model.
+```{r}
+m2 <- lmer(gene_expression ~ 
+             conc * treatment + cell_type + (1 | gene_line),
+           data = genes)
+summary(m2)
+```
+
+Figure @fig-m2 shows the assumption checking for the model.
+```{r}
+#| fig-cap: The residuals vs fitted plot for the second model. We see that there is random scattering, so the model satisfies the homoscedasticity assumption.
+#| label: fig-m2
+pdf(here::here("figs", "2023-05-08-mixed-effects/model2-assumptions.pdf"))
+plot(m2)
+dev.off()
+```
+
+## Model 3: Treatment x Cell Type
+Our third model creates interaction between treatment and cell type, 
+but is otherwise identical to the first model.
+```{r}
+m3 <- lmer(gene_expression ~ 
+             conc + treatment * cell_type + (1 | gene_line),
+           data = genes)
+summary(m3)
+```
+
+Figure @fig-m3 shows the assumption checking for the model.
+```{r}
+#| fig-cap: The residuals vs fitted plot for the third model. We see that there is strong curvature, so the model does not satisfy the homoscedasticity assumption. 
+#| label: fig-m3
+plot(m3)
+```
+
+## Model 4: Concentration x Cell Type
+Our fourth model creates interaction between concentration of treatment and cell type, 
+but is otherwise identical to the first model.
+```{r}
+m4 <- lmer(gene_expression ~ 
+             treatment + conc * cell_type + (1 | gene_line),
+           data = genes)
+summary(m4)
+```
+
+Figure @fig-m4 shows the assumption checking for the model.
+```{r}
+#| fig-cap: The residuals vs fitted plot for the fourth model. We see that there is strong curvature, so the model does not satisfy the homoscedasticity assumption. 
+#| label: fig-m4
+plot(m4)
+```
+
+## Model 5: Concentration x Treatment x Cell Type
+Our final model creates interaction between concentration of treatment, treatment type, and cell type, keeping gene line as a random effect.
+```{r}
+m5 <- lmer(gene_expression ~ 
+            conc * treatment * cell_type + (1 | gene_line),
+           data = genes)
+summary(m5)
+```
+
+Figure @fig-m5 shows the assumption checking for the model.
+```{r}
+#| fig-cap: The residuals vs fitted plot for the final model. We see that there is mostly random scattering, so the assumption of homoscedastic residuals is met. However, there is slight fanning, so it does not satisfy the assumption as well as the second model.
+#| label: fig-m5
+plot(m5)
+```
+
+We see that the second and fifth models best satisfy the assumptions of a linear model, so we will 
+compare their AIC values to choose the most suitable one:
+```{r}
+AIC(m2, m5)
+```
+
+Although the fifth model with the three-way interaction term has a significantly lower AIC, 
+we see that the second model better satisfies the homoscedasticity assumption in @fig-m2. We will 
+also calculate some quantitative metrics by creating a function to calculate 
 the RMSE and $R^2$ value, and running it on each model:
 ```{r}
 get_rmse_r2 <- function(model){
@@ -132,13 +155,13 @@ get_rmse_r2 <- function(model){
   RMSE <- metric_rmse(actual, predicted)
   R2 <- metric_rsquared(actual, predicted)
   
-  return(RMSE, R2)
+  return(c(RMSE, R2))
 }
 ```
 
-We output the metrics as a tibble where the models are in their respective order.
+
 ```{r}
-models <- c(cell_lm, af_lm, cell_af_lm, cell_slope_lm)
+models <- c(m2, m5)
 RMSE <- c()
 R2 <- c()
 
@@ -147,27 +170,57 @@ for(m in models){
   R2 <- append(R2, get_rmse_r2(m)[2])
 }
 
-model_comp <- tibble(Model=models, RMSE=RMSE, R2=R2)
+model_comp <- tibble(Model=c("Concentration x Treatment", 
+                             "Concentration x Treatment x Cell Type"), 
+                     RMSE=RMSE, R2=R2)
 model_comp
 ```
 
+We can see that there is a minute difference in RMSE and $R^2$ between the models, so we will opt for 
+Model 2, as it has fewer degrees of freedom and is less likely to overfit the data, but still 
+creates a good model. 
+
+To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-csplot:
+```{r}
+#| label: fig-m2fit
+#| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points. There is a better fit on the gene lines that used Activating Factor 42 as the applied treatment, compared with the Placebo.
+
+genes |> 
+  ggplot(aes(x=conc, y=gene_expression, color=treatment, shape=cell_type,
+             label=ifelse(conc==10, as.character(gene_line),''))) +
+  geom_point() +
+  geom_label_repel(nudge_x = 2,
+                 direction = "y",
+                 show.legend = FALSE) +
+  geom_line(aes(y=predict(m2))) +
+  facet_wrap(~ gene_line, scales="free") +
+  # facet_wrap(~ cell_type, scales="free", 
+  #            labeller = labeller(cell_type = cell_type.labs)) +
+  labs(x = "Concentration (mg/mL)",
+       y = "Gene Expression",
+       color = "Treatment",
+       shape = "Cell Type",
+       label = "Gene Line") +
+  theme(legend.position="bottom") +
+  scale_shape(labels=c("101 Type Cell", "Wild Type Cell")) +
+  paletteer::scale_color_paletteer_d("tvthemes::rickAndMorty",
+                                     labels=c("Activating Factor 42", "Placebo"))
+ggsave(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"))
+```
 We also get the coefficients of our chosen model and save them for future use:
 ```{r}
-coef(cell_slope_lm)$cell_type |> 
-  rename("Concentration"="conc", "Intercept"="(Intercept)") |> 
-  mutate("Cell Type"=c("101", "Wild"), .before="Concentration") |> 
-  gt() |> 
-  fmt_number(decimals = 4) |> 
-  gtsave(here::here("tabs/2023-05-08-mixed-effects/cell-coefficients.png"))
+coef(m2)$gene_line |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  tab_stubhead(label="Gene Line") |> 
+  cols_label("(Intercept)" = "Intercept",
+             "conc" = "Concentration (mg/mL)",
+             "treatmentP" = "Placebo",
+             "cell_typeWT" = "Wild Type Cell",
+             "conc:treatmentP" = "Concentration x Placebo") |> 
+  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-coefs.html"))
 ```
 
 
-```{r}
-coef(cell_slope_lm)$activating_factor |> 
-  rename("Concentration"="conc", "Intercept"="(Intercept)") |> 
-  mutate("Treatment"=c("Activating Factor 42", "Placebo"), .before="Concentration") |> 
-  gt() |> 
-  fmt_number(decimals = 4) |> 
-  gtsave(here::here("tabs/2023-05-08-mixed-effects/af-coefficients.png"))
-```
+
 
