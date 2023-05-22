@@ -72,14 +72,14 @@ We further split `L1` into separate columns and save the labels as new columns:
 ```{r}
 gene_line <- c()
 cell_type <- c()
-activating_factor <- c()
+treatment <- c()
 trial_number <- c()
 
 for(i in 1:nrow(melted_genes)){
   split_label <- str_split(melted_genes[i, ]$L1, "-")[[1]]
   gene_line[i] <- split_label[2]
   cell_type[i] <- split_label[3]
-  activating_factor[i] <- split_label[4]
+  treatment[i] <- split_label[4]
   trial_number[i] <- split_label[5]
 }
 
@@ -88,7 +88,7 @@ melted_genes <- melted_genes |>
   rename(gene_expression = value) |> 
   mutate(gene_line = gene_line,
          cell_type = cell_type,
-         activating_factor = activating_factor,
+         treatment = treatment,
          trial_number = trial_number)
 ```
 

@@ -1,4 +1,4 @@
-"","conc","gene_expression","gene_line","cell_type","activating_factor","trial_number"
+"","conc","gene_expression","gene_line","cell_type","treatment","trial_number"
 "1",0,5.51,"CsE","WT","P","1"
 "2",1,6.41,"CsE","WT","P","1"
 "3",2,5.71,"CsE","WT","P","1"
