@@ -13,7 +13,7 @@ We load the necessary packages for working with data frames, generating mixed ef
 models, labeling graphs, and colouring graphs. We also read in the melted tibble from our previous
 data cleaning.
 ```{r}
-pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra)
+pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra, performance)
 genes <- read.csv(here::here("data", "melted-gene-WTF-IISfD-data.csv"))
 head(genes)
 ```
@@ -138,45 +138,21 @@ plot(m5)
 ```
 
 We see that the second and fifth models best satisfy the assumptions of a linear model, so we will 
-compare their AIC values to choose the most suitable one:
+compare their AIC values, RMSE values, and $R^2$ values to choose the most suitable one:
+
 ```{r}
-AIC(m2, m5)
+compare_performance(m2, m5) |>
+  select(c(AIC, R2_conditional, RMSE)) |> 
+  rename("R2" = "R2_conditional") |> 
+  add_column(Model=c("Concentration x Treatment", 
+                 "Concentration x Treatment x Cell Type"),
+             .before = "AIC") |> 
+  knitr::kable() |> 
+  save_kable(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.html"))
 ```
 
 Although the fifth model with the three-way interaction term has a significantly lower AIC, 
-we see that the second model better satisfies the homoscedasticity assumption in @fig-m2. We will 
-also calculate some quantitative metrics by creating a function to calculate 
-the RMSE and $R^2$ value, and running it on each model:
-```{r}
-get_rmse_r2 <- function(model){
-  actual <- genes$gene_expression
-  predicted <- predict(model, genes)
-  
-  RMSE <- metric_rmse(actual, predicted)
-  R2 <- metric_rsquared(actual, predicted)
-  
-  return(c(RMSE, R2))
-}
-```
-
-
-```{r}
-models <- c(m2, m5)
-RMSE <- c()
-R2 <- c()
-
-for(m in models){
-  RMSE <- append(RMSE, get_rmse_r2(m)[1])
-  R2 <- append(R2, get_rmse_r2(m)[2])
-}
-
-model_comp <- tibble(Model=c("Concentration x Treatment", 
-                             "Concentration x Treatment x Cell Type"), 
-                     RMSE=RMSE, R2=R2)
-model_comp
-```
-
-We can see that there is a minute difference in RMSE and $R^2$ between the models, so we will opt for 
+we see that the second model better satisfies the homoscedasticity assumption in @fig-m2. We can see that there is a minute difference in RMSE and $R^2$ between the models, so we will opt for 
 Model 2, as it has fewer degrees of freedom and is less likely to overfit the data, but still 
 creates a good model. 
 
