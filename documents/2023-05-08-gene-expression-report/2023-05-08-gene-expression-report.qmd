@@ -66,7 +66,8 @@ concentration of treatment.
 ```{r}
 #| label: fig-eda
 #| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points.
-knitr::include_graphics(here::here("figs", "2023-05-08-mixed-effects/model-eda.pdf"))
+knitr::include_graphics(here::here("figs", 
+                                   "2023-05-08-mixed-effects/model-eda.pdf"))
 ```
 
 The gene line is effectively an identifier for each trial, so without multiple trials per gene line, we cannot use effectively interpret it as a predictor. However, 
@@ -90,14 +91,17 @@ Upon looking at the residuals vs fitted plots, only the second and fifth models 
 ```{r}
 #| label: fig-m2res
 #| fig-cap: Residuals versus fitted plot for the second model, which varies intercept by gene line and considers interaction between concentration of treatment and treatment type. We see there is random scattering of the residuals, satisfying the assumption of homoscedasticity.
-knitr::include_graphics(here::here("figs", "2023-05-08-mixed-effects/model2-assumptions.pdf"))
+knitr::include_graphics(here::here("figs", 
+                                   "2023-05-08-mixed-effects/model2-assumptions.pdf"))
 ```
 
 @tbl-comp shows the comparison of the Root Mean Square Error (RMSE) metric, $R^2$ metric, and AIC metric for our two models, as well as their degrees of freedom. We have chosen Model 2, since it has fewer degrees of freedom, and is only slightly different from Model 5. 
 ```{r, echo=FALSE}
 #| label: tbl-comp
-#| tbl-cap: Quantitative metrics for the two models. We see that the three-way interaction model has a much lower AIC than the Concentration x Treatment model, but the RMSE and $$R^2$$ are both quite similar. Given that the three-way interaction model has more degrees of freedom, we have chosen the Concentration x Treatment.
-htmltools::includeHTML(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.html"))
+#| tbl-cap: Quantitative metrics for the two models. We see that the three-way interaction model has a much lower AIC than the Concentration x Treatment model, but the RMSE and $R^2$ are both quite similar. Given that the three-way interaction model has more degrees of freedom, we have chosen the Concentration x Treatment model.
+
+htmltools::includeHTML(here::here("tabs", 
+                                  "2023-05-08-mixed-effects/model-metrics.html"))
 ```
 
 @fig-plot shows the fit of the linear mixed effect model to the data, separated by cell type.
@@ -105,7 +109,8 @@ htmltools::includeHTML(here::here("tabs", "2023-05-08-mixed-effects/model-metric
 #| label: fig-plot
 #| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42. 
 #| width: 80%
-knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"), dpi=400)
+knitr::include_graphics(here::here("figs", 
+                                   "2023-05-08-mixed-effects/model-plot.pdf"))
 ```
 
 @tbl-coef shows the coefficients of our final model.
@@ -113,7 +118,8 @@ knitr::include_graphics(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf
 #| label: tbl-coef
 #| fig-cap: Coefficients of the chosen model. We notice the variation in intercept across gene lines is not particularly large, with the exception of Rza and xpo, which fall out of the 10-13 gene expression units that the other gene lines satisfy. The slope is just under 3 gene expression units, we subtract almost 5 units from the intercept if placebo treatment is used and roughly 3.3 units if we apply treatment to a Wild Type cell. We also subtract 1.9 units from the the slope if placebo treatment is used, indicating that 101 Type cells with Activating Factor 42 applied exhibit the greatest gene expression.
 
-htmltools::includeHTML(here::here("tabs", "2023-05-08-mixed-effects/m2-coefs.html"))
+htmltools::includeHTML(here::here("tabs", 
+                                  "2023-05-08-mixed-effects/m2-coefs.html"))
 ```
 
 # Discussion

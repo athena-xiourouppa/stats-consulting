@@ -148,12 +148,13 @@ compare_performance(m2, m5) |>
                  "Concentration x Treatment x Cell Type"),
              .before = "AIC") |> 
   knitr::kable() |> 
-  save_kable(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.html"))
+  save_kable(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.html"),
+             inline_css=TRUE)
 ```
 
 Although the fifth model with the three-way interaction term has a significantly lower AIC, 
 we see that the second model better satisfies the homoscedasticity assumption in @fig-m2. We can see that there is a minute difference in RMSE and $R^2$ between the models, so we will opt for 
-Model 2, as it has fewer degrees of freedom and is less likely to overfit the data, but still 
+Model 2, as it has fewer degrees of freedom and is less likely to over-fit the data, but still 
 creates a good model. 
 
 To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-csplot:
@@ -183,6 +184,7 @@ genes |>
                                      labels=c("Activating Factor 42", "Placebo"))
 ggsave(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"))
 ```
+
 We also get the coefficients of our chosen model and save them for future use:
 ```{r}
 coef(m2)$gene_line |> 
@@ -194,9 +196,9 @@ coef(m2)$gene_line |>
              "treatmentP" = "Placebo",
              "cell_typeWT" = "Wild Type Cell",
              "conc:treatmentP" = "Concentration x Placebo") |> 
-  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-coefs.html"))
+  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-coefs.html"),
+         inline_css=TRUE)
 ```
-
 
 
 
