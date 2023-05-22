@@ -2,7 +2,6 @@
 title: "Mixed Effects Model"
 author: "Athena Xiourouppa"
 format: pdf
-  smart: false
 ---
 
 The following document details the development of a predictive mixed-effects model for 
@@ -13,7 +12,7 @@ We load the necessary packages for working with data frames, generating mixed ef
 models, labeling graphs, and colouring graphs. We also read in the melted tibble from our previous
 data cleaning.
 ```{r}
-pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra, performance)
+pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra, performance, gt)
 genes <- read.csv(here::here("data", "melted-gene-WTF-IISfD-data.csv"))
 head(genes)
 ```
@@ -40,7 +39,7 @@ genes |>
                  direction = "y",
                  show.legend = FALSE) +
   facet_wrap(~ cell_type, scales="free",
-             labeller = labeller(cell_type = cell_type.labs)) +
+             labeller = labeller(cell_type = c("101 Type", "Wild Type"))) +
   labs(x = "Concentration (mg/mL)",
        y = "Gene Expression",
        color = "Treatment",
@@ -82,6 +81,11 @@ Figure @fig-m2 shows the assumption checking for the model.
 ```{r}
 #| fig-cap: The residuals vs fitted plot for the second model. We see that there is random scattering, so the model satisfies the homoscedasticity assumption.
 #| label: fig-m2
+
+plot(m2)
+```
+
+```{r, echo=FALSE}
 pdf(here::here("figs", "2023-05-08-mixed-effects/model2-assumptions.pdf"))
 plot(m2)
 dev.off()
@@ -156,7 +160,7 @@ we see that the second model better satisfies the homoscedasticity assumption in
 Model 2, as it has fewer degrees of freedom and is less likely to over-fit the data, but still 
 creates a good model. 
 
-To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-csplot:
+To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-m2fit:
 ```{r}
 #| label: fig-m2fit
 #| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points. There is a better fit on the gene lines that used Activating Factor 42 as the applied treatment, compared with the Placebo.
