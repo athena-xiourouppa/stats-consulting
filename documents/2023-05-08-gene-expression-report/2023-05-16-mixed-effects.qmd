@@ -147,9 +147,8 @@ compare_performance(m2, m5) |>
   add_column(Model=c("Concentration x Treatment", 
                  "Concentration x Treatment x Cell Type"),
              .before = "AIC") |> 
-  knitr::kable() |> 
-  save_kable(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.html"),
-             inline_css=TRUE)
+  gt() |> 
+  gtsave(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.png"))
 ```
 
 Although the fifth model with the three-way interaction term has a significantly lower AIC, 
@@ -196,8 +195,7 @@ coef(m2)$gene_line |>
              "treatmentP" = "Placebo",
              "cell_typeWT" = "Wild Type Cell",
              "conc:treatmentP" = "Concentration x Placebo") |> 
-  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-coefs.html"),
-         inline_css=TRUE)
+  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-coefs.png"))
 ```
 
 
