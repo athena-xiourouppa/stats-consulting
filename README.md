@@ -1,23 +1,34 @@
 # Kollaboration with Karl
 
+If opening in RStudio, please open the included project `collaboration-project.Rproj`.
+
 ## Folder Structure
 * data - modified data files
 * documents - Quarto files and their corresponding pdfs detailing specific processes
 * exports - files (usually in Microsoft Office suite format) sent to Karl
 * figs - produced figures
 * raw-data - data files given by Karl
-* resources - 
 * tabs - produced tables
 
 ## Data (`data`)
 ### Modified gene expression data (`modified-WTF-IISfD-data.xlsx`)
 Karl sent a spreadsheet of lab data measuring relationship between
-concentration of either a saline (placebo) solution or Activating Factor 42 on gene expression in both Wild-Type and 101-Type cells. This is the version imported into R
-that was cleaned in Excel.
+concentration of either a saline (placebo) solution or Activating Factor 42 on gene expression in both Wild-Type and 101-Type cells. This is the version imported into R that was cleaned in Excel via the following corrections:
+
+* Deleted the figures on pages `GL-CsE` and `GL-bNo`
+* Removed the summary statistics on page `GL-CsE`
+* Shifted data cells to top-left corner to avoid blank rows when reading into R
+* Made cell line and treatment type names consistent
+* Removed cell line and treatment type names from spreadsheet and copied separately. 
 
 ### Cleaned gene expression data (`clean-gene-WTF-IISfD-data.csv`)
 Cleaned version of the modified gene expression data, including labels for cell lines. This version
-can be imported into R for plotting and further analysis.
+can be imported into R for plotting and further analysis. We obtained this by importing 
+`modified-WTF-IISfD-data.xlsx` into R using `readxl` (see `2023-03-03-data-cleaning.qmd` for more 
+details), and performing the following procedures:
+
+* Obtained names of Excel sheets to label each of the eight experiment tibbles
+* Imputed a missing value of gene expression (indicated by a -99) in the fUg gene line with the mean gene expression of that experiment
 
 ### Melted gene expression data (`melted-gene-WTF-IISfD-data.csv`)
 Melted version of the above into a single tibble.
