@@ -1,13 +1,18 @@
 ---
 title: "A Mixed-Effects Model for the Effect of Activating Factor 42 on Gene Expression in Wild-Type and 101-Type Cells"
 author: "Athena Xiourouppa"
-format: pdf
+format: 
+  pdf:
+    include-in-header: 
+     - \usepackage{subfig}
 bibliography: references.bib
 ---
 
 ```{r, echo=FALSE}
-pacman::p_load(tidyverse, gt)
-knitr::opts_chunk$set(fig.pos = 'H')
+knitr::opts_chunk$set(fig.pos = 'H', 
+                      message=FALSE, 
+                      warning=FALSE, 
+                      info=FALSE)
 ```
 
 # Introduction
@@ -20,6 +25,13 @@ We wish to develop a predictive model for the gene expression by investigating t
 effects of the predictors
 gene line, cell type, treatment, all of which are categorical, and concentration of 
 treatment, which is numeric and measured in milligrams per millilitre.
+
+```{r, echo=FALSE}
+pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra, 
+               performance, gt, lmerTest, gtsummary)
+genes <- read.csv(here::here("data", "melted-gene-WTF-IISfD-data.csv"))
+```
+
 
 {{< pagebreak >}}
 
@@ -69,8 +81,25 @@ concentration of treatment.
 ```{r, echo=FALSE}
 #| label: fig-eda
 #| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value of gene expression. Experiments that used Activating Factor 42 have a higher slope value, and therefore gene expression. We have also labelled the gene line for each set of eleven points.
-knitr::include_graphics(here::here("figs", 
-                                   "2023-05-08-mixed-effects/model-eda.pdf"))
+
+
+genes |> 
+  ggplot(aes(x=conc, y=gene_expression, color=treatment,
+             label=ifelse(conc==10, as.character(gene_line),''))) +
+  geom_point() +
+  geom_label_repel(nudge_x = 2,
+                 direction = "y",
+                 show.legend = FALSE) +
+  facet_wrap(~ cell_type, scales="free",
+             labeller = labeller(cell_type = c("C101" = "101 Type", 
+                                              "WT" = "Wild Type"))) +
+  labs(x = "Concentration (mg/mL)",
+       y = "Gene Expression",
+       color = "Treatment",
+       label = "Gene Line") +
+  theme(legend.position="bottom") +
+  paletteer::scale_color_paletteer_d("tvthemes::rickAndMorty",
+                                     labels=c("Activating Factor 42", "Placebo"))
 ```
 
 The gene line is effectively an identifier for each trial, so without multiple trials per gene line, we cannot use effectively interpret it as a predictor. However, 
@@ -78,7 +107,7 @@ we can consider the random effects that may result from differences between them
 the `lme4` [@lme2015] package to fit models and check assumption plots.
 
 Each model used gene line as a random intercept effect, but changed the type of interaction between 
-the three variables:
+the three variables as fixed effects:
 
 1. No interaction
 2. Concentration of Treatment x Treatment Type
@@ -87,68 +116,133 @@ the three variables:
 5. Concentration of Treatment x Treatment Type x Cell Type
 
 We compared these three models by their residuals vs fitted plots, AIC, RMSE, and $R^2$, using the 
-`performance` [@per2021]  package. We also ensured that the gene line random effect was significant for each model via the `ranova` function in the `lmerTest` [@lt2017] package.
+`performance` [@per2021]  package. We also ensured that the gene line random effect was significant for each model via the `ranova` function in the `lmerTest` [@lt2017] package and .
 
 {{< pagebreak >}}
 
 # Results
-Upon looking at the residuals vs fitted plots, only the second and fifth models satisfied the assumption of homoscedasticity, so we discarded the other models. The plot for the second model is shown in Figure @fig-m2res, and is very similar to that of the fifth model, hence why it is not shown. 
+Upon looking at the residuals vs fitted plots, only the second and fifth models satisfied the assumption of homoscedasticity, so we discarded the other models. The plot for the fifth model is shown in @fig-m5res, and is very similar to that of the second model, hence why it is not shown. 
 
 ```{r, echo=FALSE}
-#| label: fig-m2res
-#| fig-cap: Residuals versus fitted plot for the second model, which varies intercept by gene line and considers interaction between concentration of treatment and treatment type. We see there is random scattering of the residuals, satisfying the assumption of homoscedasticity.
-knitr::include_graphics(here::here("figs", 
-                                   "2023-05-08-mixed-effects/model2-assumptions.pdf"))
+m2 <- lmer(gene_expression ~ 
+             conc * treatment + cell_type + (1 | gene_line),
+           data = genes)
 ```
-
-@fig-comp shows the comparison of the Root Mean Square Error (RMSE) metric, $R^2$ metric, and AIC metric for our two models, as well as their degrees of freedom. We have chosen Model 2, since it has fewer degrees of freedom, and is only slightly different from Model 5. 
 
 ```{r, echo=FALSE}
-#| label: fig-comp
-#| fig-cap: Quantitative metrics for the two models. We see that the three-way interaction model has a much lower AIC than the Concentration x Treatment model, but the RMSE and $R^2$ are both quite similar. Given that the three-way interaction model has more degrees of freedom, we have chosen the Concentration x Treatment model.
-
-knitr::include_graphics(here::here("tabs", 
-                                  "2023-05-08-mixed-effects/model-metrics.png"))
+m5 <- lmer(gene_expression ~ 
+            conc * treatment * cell_type + (1 | gene_line),
+           data = genes)
 ```
-
-@fig-ranova shows the significance of the gene line mixed effects term in the chosen second model. All models had significant interaction terms at the 5% level, so this was not a deciding factor in the chosen model.
 
 ```{r, echo=FALSE}
-#| label: fig-ranova
-#| fig-cap: ANOVA table showing difference in metrics for the second model with and without the gene line ramdom effect. We see that the gene line random effect is significant.
+#| label: fig-m5res
+#| fig-cap: Residuals versus fitted plot for the fifth model, which varies intercept by gene line and considers interaction between concentration of treatment and treatment type. We see there is mostly random scattering of the residuals, satisfying the assumption of homoscedasticity.
 
-knitr::include_graphics(here::here("tabs", 
-                                  "2023-05-08-mixed-effects/m2-ranova.png")) 
+plot(m5)
 ```
 
-@fig-plot shows the fit of the linear mixed effect model to the data, separated by cell type.
+@tbl-comp shows the comparison of the Root Mean Square Error (RMSE) metric, $R^2$ metric, and AIC metric for our two models,. We have chosen Model 5, since it has a much lower AIC than Model 2.
+
+```{r, echo=FALSE}
+#| label: tbl-comp
+#| tbl-cap: Quantitative metrics for the two models. We see that the three-way interaction model has a much lower AIC than the Concentration x Treatment model, but the RMSE and R squared are both quite similar. Given that the three-way interaction model has more degrees of freedom, we have chosen the Concentration x Treatment model.
+#| tbl-cap-location: top
+
+compare_performance(m2, m5) |>
+  select(c(AIC, R2_conditional, RMSE)) |> 
+  rename("R2" = "R2_conditional") |> 
+  add_column(Model=c("Concentration x Treatment", 
+                 "Concentration x Treatment x Cell Type"),
+             .before = "AIC") |> 
+  gt() |> 
+  fmt_number(decimals = 4)
+```
+
+@tbl-ranova shows the significance of the gene line mixed effects term in the chosen fifth model. All models had significant interaction terms at the 5% level, so this was not a deciding factor in the chosen model.
+
+```{r, echo=FALSE}
+#| label: tbl-ranova
+#| tbl-cap: ANOVA table showing difference in metrics for the fifth model with and without the gene line ramdom effect. We see that the gene line random effect is significant.
+#| tbl-cap-location: bottom
+
+ranova(m5) |> 
+  select("Pr(>Chisq)") |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  tab_stubhead(label="Random Effect") |> 
+  fmt_scientific(columns = 2, decimals = 2) |> 
+  tab_style_body(
+    style = cell_text(weight = "bold"),
+    columns = `Pr(>Chisq)`,
+    fn = function(x) x > 0 & x <= 0.05,
+  ) 
+```
+
+@tbl-anova shows the significance of the fixed effects in the fifth model. Since the three-way interaction term is significant, all lower-order interaction terms and singular terms are also significant by the principle of marginality.
+
+```{r, echo=FALSE}
+#| label: tbl-anova
+#| tbl-cap: ANOVA table showing difference in metrics for the fifth model's fixed effects. At the 5% level, treatment, cell type, and their interaction are not significant, but the three-way interaction term with concentration is, so we do not discard any terms.
+#| tbl-cap-location: bottom
+
+anova(m5) |> 
+  select(c("F value", "Pr(>F)")) |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  fmt_scientific(columns = 3, decimals = 2) |> 
+  tab_stubhead(label="Predictor") |> 
+  tab_style_body(
+    style = cell_text(weight = "bold"),
+    columns = `Pr(>F)`,
+    fn = function(x) x > 0 & x <= 0.05,
+  )
+```
+
+@fig-plot shows the fit of the linear mixed effect model to the data, separated by gene line.
 
 ```{r, echo=FALSE}
 #| label: fig-plot
 #| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42. 
-#| width: 40%
+#| fig-size: 300
 
-knitr::include_graphics(here::here("figs", 
-                                   "2023-05-08-mixed-effects/model-plot.pdf"),
-                        dpi=200)
+knitr::include_graphics(here::here("figs", "2023-05-08-mixed-effects/model-plot.pdf"))
 ```
-
-@fig-coef shows the coefficients of our final model.
+@tbl-fixed and @tbl-rand shows the coefficients of the fixed and random effects for our final model, respectively.
 
 ```{r, echo=FALSE}
-#| label: fig-coef
-#| fig-cap: Coefficients of the chosen model. We notice the variation in intercept across gene lines is not particularly large, with the exception of Rza and xpo, which fall out of the 10-13 gene expression units that the other gene lines satisfy. The slope is just under 3 gene expression units. We subtract almost 5 units from the intercept if placebo treatment is used and roughly 3.3 units if we apply treatment to a Wild Type cell. We also subtract 1.9 units from the the slope if placebo treatment is used, indicating that 101 Type cells with Activating Factor 42 applied exhibit the greatest gene expression.
+#| label: tbl-fixed
+#| tbl-cap: "Model coefficients for fixed effects. The slope (concentration term) is just over 3 gene expression units. We subtract almost 5 units from the intercept if placebo treatment is used and roughly 0.3 units if we apply treatment to a Wild Type cell. However, we add 0.08 to the intercept if placebo treatment is used on a Wild Type cell. We also subtract 1.4 units from the the slope if placebo treatment is used, 0.12 units if a Wild Type cell is used, and an additional 0.97 if both are used. This mostly indicates that 101 Type cells with Activating Factor 42 applied exhibit the greatest gene expression."
 
-knitr::include_graphics(here::here("tabs", 
-                                  "2023-05-08-mixed-effects/m2-coefs.png"))
+fixed <- fixef(m5)
+names(fixed)[1] <- "Intercept"
+fixed |> 
+  as.data.frame() |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  cols_label("fixed" = "Coefficient") |> 
+  tab_stubhead(label="Term")
+```
+
+
+```{r, echo=FALSE}
+#| label: tbl-rand
+#| tbl-cap: "Random effects terms for intercept. These terms are added to the baseline intercept of 9.9175 gene expression units in the fixed effects table, and are mostly within 1 gene expression unit, with the exception of Rza and xpo which subtract and add 4.37 gene expression units, respectively."
+
+ranef(m5)$gene_line |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  tab_stubhead(label="Gene Line")
 ```
 
 {{< pagebreak >}}
 
 # Discussion
-From @fig-plot, we see that applying Activating Factor 42 increases the slope, so for an increase of 1 mg/mL of treatment, gene expression subsequently increases for this treatment by a value of approximately 3 units at most. Similarly, we mostly see greater gene expression for 101 Type Cells, also evident by the subtractive term in @fig-coef. The bNo and CsE gene lines have the most variability about the line of best fit from our model, but other gene lines are fitted more accurately. This could likely be due to the fact that the placebo treatment has limited effect on gene expression, so this is simply natural variation.
+From @tbl-fixed, we see that as concentration of treatment increases, gene expression also increases. The slope is maximised when Activating Factor 42 is used on a 101 Type cell, but using placebo treatment or Wild Type cells decreases both the slope and the intercept, and therefore gene expression. In @tbl-rand, we see that most gene lines show consistency in their intercept, indicating that the variation between them is not high, however the Rza and xpo lines have significantly lower and higher intercepts, and therefore gene expressions, respectively.
 
-The chosen model has an RMSE of approximately $1.49$ gene expression units, which is smaller than the 
+In @fig-plot, the bNo and CsE gene lines have the most variability about the line of best fit from our model, but other gene lines are fitted more accurately. This could likely be due to the fact that the placebo treatment has less of an effect on gene expression, so this is simply natural variation.
+
+As seen in @tbl-comp, the chosen model has an RMSE of approximately $1.49$ gene expression units, which is smaller than the 
 and a high $R^2$ value of $97.9\%$, meaning just under $98\%$ of the 
 variation in gene expression is explained by our model. This could also be indicative of overfitting. To further justify the validity of the model, error bounds on the equipment used to measure gene expression should be provided so they can be 
 accounted for by the model.

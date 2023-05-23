@@ -40,7 +40,8 @@ genes |>
                  direction = "y",
                  show.legend = FALSE) +
   facet_wrap(~ cell_type, scales="free",
-             labeller = labeller(cell_type = c("101 Type", "Wild Type"))) +
+             labeller = labeller(cell_type = c("C101" = "101 Type", 
+                                              "WT" = "Wild Type"))) +
   labs(x = "Concentration (mg/mL)",
        y = "Gene Expression",
        color = "Treatment",
@@ -54,6 +55,7 @@ ggsave(here::here("figs/2023-05-08-mixed-effects/model-eda.pdf"))
 ## Model 1: No Interaction
 Our first model uses gene line as a random intercept effect, with three predictors of 
 concentration, treatment, and cell type.
+
 ```{r}
 m1 <- lmer(gene_expression ~ 
              conc + treatment + cell_type + (1 | gene_line),
@@ -61,10 +63,14 @@ m1 <- lmer(gene_expression ~
 summary(m1)
 ```
 
-We will check the significance of the gene line random effect at a 5% level, which it is:
+We will check the significance of the gene line random effects and other fixed effects at a 5% level:
 ```{r}
 ranova(m1)
 ```
+```{r}
+anova(m1)
+```
+All terms are significant at a 5% level except for the `cell_type` term.
 
 Figure @fig-m1 shows the assumption checking for the model.
 ```{r}
@@ -83,14 +89,15 @@ m2 <- lmer(gene_expression ~
 summary(m2)
 ```
 
-We will check the significance of the gene line random effect at a 5% level, which it is:
+We will check the significance of the gene line random effects and other fixed effects at a 5% level:
 ```{r}
-ranova(m2) |> 
-  gt(rownames_to_stub=TRUE) |> 
-  fmt_number(decimals=4) |> 
-  tab_stubhead(label="Random Effect") |> 
-  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-ranova.png"))
+ranova(m2)
 ```
+
+```{r}
+anova(m2)
+```
+All terms are significant except for the treatment and cell type terms at the 5% level, however the interaction term Concentration x Treatment is significant, so only cell type is insignificant.
 
 Figure @fig-m2 shows the assumption checking for the model.
 ```{r}
@@ -98,12 +105,6 @@ Figure @fig-m2 shows the assumption checking for the model.
 #| label: fig-m2
 
 plot(m2)
-```
-
-```{r, echo=FALSE}
-pdf(here::here("figs", "2023-05-08-mixed-effects/model2-assumptions.pdf"))
-plot(m2)
-dev.off()
 ```
 
 ## Model 3: Treatment x Cell Type
@@ -116,10 +117,14 @@ m3 <- lmer(gene_expression ~
 summary(m3)
 ```
 
-We will check the significance of the gene line random effect at a 5% level, which it is:
+We will check the significance of the gene line random effects and other fixed effects at a 5% level:
 ```{r}
 ranova(m3)
 ```
+```{r}
+anova(m3)
+```
+We see that the Treatment x Cell Type term is insignificant, as well as the cell type term.
 
 Figure @fig-m3 shows the assumption checking for the model.
 ```{r}
@@ -142,7 +147,12 @@ We will check the significance of the gene line random effect at a 5% level, whi
 ```{r}
 ranova(m4)
 ```
-
+```{r}
+anova(m4)
+```
+All terms are significant, since the interaction term of Concentration x Cell Type is significant, 
+meaning by the principle of marginality, we must keep the cell type predictor, even though it is 
+insignificant.
 
 Figure @fig-m4 shows the assumption checking for the model.
 ```{r}
@@ -160,16 +170,48 @@ m5 <- lmer(gene_expression ~
 summary(m5)
 ```
 
-We will check the significance of the gene line random effect at a 5% level, which it is:
+We will check the significance of the gene line random effects and other fixed effects at a 5% level:
 ```{r}
-ranova(m5)
+ranova(m5) |> 
+  select("Pr(>Chisq)") |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  tab_stubhead(label="Random Effect") |> 
+  fmt_scientific(columns = 2, decimals = 2) |> 
+  tab_style_body(
+    style = cell_text(style = "italic"),
+    columns = `Pr(>Chisq)`,
+    fn = function(x) x > 0 & x <= 0.05,
+  ) |> 
+gtsave(here::here("tabs", "2023-05-08-mixed-effects/m5-ranova.png"))
 ```
+```{r}
+anova(m5) |> 
+  select(c("F value", "Pr(>F)")) |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  fmt_scientific(columns = 3, decimals = 2) |> 
+  tab_stubhead(label="Predictor") |> 
+  tab_style_body(
+    style = cell_text(style = "italic"),
+    columns = `Pr(>F)`,
+    fn = function(x) x > 0 & x <= 0.05,
+  ) |> 
+gtsave(here::here("tabs", "2023-05-08-mixed-effects/m5-anova.png"))
+```
+Since the three-way interaction term is significant, all other predictors are significant here, as is the random effect.
 
 Figure @fig-m5 shows the assumption checking for the model.
 ```{r}
 #| fig-cap: The residuals vs fitted plot for the final model. We see that there is mostly random scattering, so the assumption of homoscedastic residuals is met. However, there is slight fanning, so it does not satisfy the assumption as well as the second model.
 #| label: fig-m5
 plot(m5)
+```
+
+```{r, echo=FALSE}
+pdf(here::here("figs", "2023-05-08-mixed-effects/m5-assumptions.pdf"))
+plot(m5)
+dev.off()
 ```
 
 We see that the second and fifth models best satisfy the assumptions of a linear model, so we will 
@@ -186,27 +228,19 @@ compare_performance(m2, m5) |>
   gtsave(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.png"))
 ```
 
-Although the fifth model with the three-way interaction term has a significantly lower AIC, 
-we see that the second model better satisfies the homoscedasticity assumption in @fig-m2. We can see that there is a minute difference in RMSE and $R^2$ between the models, so we will opt for 
-Model 2, as it has fewer degrees of freedom and is less likely to over-fit the data, but still 
-creates a good model. 
+Since the fifth model with the three-way interaction term has a significantly lower AIC, we 
+will choose this model. However, we can see that there is a minute difference in RMSE and $R^2$ between the models. 
 
-To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-m2fit:
+To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-m5fit:
 ```{r}
-#| label: fig-m2fit
+#| label: fig-m5fit
 #| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points. There is a better fit on the gene lines that used Activating Factor 42 as the applied treatment, compared with the Placebo.
 
 genes |> 
-  ggplot(aes(x=conc, y=gene_expression, color=treatment, shape=cell_type,
-             label=ifelse(conc==10, as.character(gene_line),''))) +
+  ggplot(aes(x=conc, y=gene_expression, color=treatment, shape=cell_type)) +
   geom_point() +
-  geom_label_repel(nudge_x = 2,
-                 direction = "y",
-                 show.legend = FALSE) +
-  geom_line(aes(y=predict(m2))) +
+  geom_line(aes(y=predict(m5))) +
   facet_wrap(~ gene_line, scales="free") +
-  # facet_wrap(~ cell_type, scales="free", 
-  #            labeller = labeller(cell_type = cell_type.labs)) +
   labs(x = "Concentration (mg/mL)",
        y = "Gene Expression",
        color = "Treatment",
@@ -221,17 +255,24 @@ ggsave(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"))
 
 We also get the coefficients of our chosen model and save them for future use:
 ```{r}
-coef(m2)$gene_line |> 
+fixef(m5) |> 
+  as.data.frame() |> 
   gt(rownames_to_stub=TRUE) |> 
   fmt_number(decimals=4) |> 
-  tab_stubhead(label="Gene Line") |> 
-  cols_label("(Intercept)" = "Intercept",
-             "conc" = "Concentration (mg/mL)",
-             "treatmentP" = "Placebo",
-             "cell_typeWT" = "Wild Type Cell",
-             "conc:treatmentP" = "Concentration x Placebo") |> 
-  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-coefs.png"))
+  cols_label("fixef(m5)" = "Coefficient") |> 
+  tab_stubhead(label="Term")
 ```
+
+```{r}
+ranef(m5)$gene_line |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  tab_stubhead(label="Gene Line") 
+  
+```
+
+
+
 
 
 
