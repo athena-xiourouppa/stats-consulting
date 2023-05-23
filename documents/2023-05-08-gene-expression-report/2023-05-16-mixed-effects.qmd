@@ -12,7 +12,8 @@ We load the necessary packages for working with data frames, generating mixed ef
 models, labeling graphs, and colouring graphs. We also read in the melted tibble from our previous
 data cleaning.
 ```{r}
-pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra, performance, gt)
+pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra, 
+               performance, gt, lmerTest)
 genes <- read.csv(here::here("data", "melted-gene-WTF-IISfD-data.csv"))
 head(genes)
 ```
@@ -60,6 +61,11 @@ m1 <- lmer(gene_expression ~
 summary(m1)
 ```
 
+We will check the significance of the gene line random effect at a 5% level, which it is:
+```{r}
+ranova(m1)
+```
+
 Figure @fig-m1 shows the assumption checking for the model.
 ```{r}
 #| fig-cap: The residuals vs fitted plot for the first model. We see that there is curvature about the zero-line, indicating poor homoscedasticity. 
@@ -75,6 +81,15 @@ m2 <- lmer(gene_expression ~
              conc * treatment + cell_type + (1 | gene_line),
            data = genes)
 summary(m2)
+```
+
+We will check the significance of the gene line random effect at a 5% level, which it is:
+```{r}
+ranova(m2) |> 
+  gt(rownames_to_stub=TRUE) |> 
+  fmt_number(decimals=4) |> 
+  tab_stubhead(label="Random Effect") |> 
+  gtsave(here::here("tabs", "2023-05-08-mixed-effects/m2-ranova.png"))
 ```
 
 Figure @fig-m2 shows the assumption checking for the model.
@@ -101,6 +116,11 @@ m3 <- lmer(gene_expression ~
 summary(m3)
 ```
 
+We will check the significance of the gene line random effect at a 5% level, which it is:
+```{r}
+ranova(m3)
+```
+
 Figure @fig-m3 shows the assumption checking for the model.
 ```{r}
 #| fig-cap: The residuals vs fitted plot for the third model. We see that there is strong curvature, so the model does not satisfy the homoscedasticity assumption. 
@@ -118,6 +138,12 @@ m4 <- lmer(gene_expression ~
 summary(m4)
 ```
 
+We will check the significance of the gene line random effect at a 5% level, which it is:
+```{r}
+ranova(m4)
+```
+
+
 Figure @fig-m4 shows the assumption checking for the model.
 ```{r}
 #| fig-cap: The residuals vs fitted plot for the fourth model. We see that there is strong curvature, so the model does not satisfy the homoscedasticity assumption. 
@@ -132,6 +158,11 @@ m5 <- lmer(gene_expression ~
             conc * treatment * cell_type + (1 | gene_line),
            data = genes)
 summary(m5)
+```
+
+We will check the significance of the gene line random effect at a 5% level, which it is:
+```{r}
+ranova(m5)
 ```
 
 Figure @fig-m5 shows the assumption checking for the model.

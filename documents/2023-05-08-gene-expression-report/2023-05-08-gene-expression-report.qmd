@@ -7,7 +7,7 @@ bibliography: references.bib
 
 ```{r, echo=FALSE}
 pacman::p_load(tidyverse, gt)
-knitr::opts_chunk$set(fig.pos = 'h!')
+knitr::opts_chunk$set(fig.pos = 'H')
 ```
 
 # Introduction
@@ -20,6 +20,8 @@ We wish to develop a predictive model for the gene expression by investigating t
 effects of the predictors
 gene line, cell type, treatment, all of which are categorical, and concentration of 
 treatment, which is numeric and measured in milligrams per millilitre.
+
+{{< pagebreak >}}
 
 # Methods
 ## Cleaning
@@ -35,8 +37,8 @@ From there, we saved this as a new spreadsheet.
 
 To import and analyse the data in R [@r2022], we used the packages `tidyverse` [@tidy2019],
 `readxl` [@xl2023], `reshape2` [@reshape2007], `gt` [@gt2023], `lme4` [@lme2015], 
-`ggrepel` [@ggrep2023], `paletteer` [@pale2021], and `performance` [@per2021] 
-to work with tibbles, import an Excel spreadsheet, melt tibbles, create tables, create mixed effects models, label plots, colour plots, and obtain model metrics, respectively. 
+`ggrepel` [@ggrep2023], `paletteer` [@pale2021], `performance` [@per2021], and `lmerTest` [@lt2017] 
+to work with tibbles, import an Excel spreadsheet, melt tibbles, create tables, create mixed effects models, label plots, colour plots, obtain model metrics, and test significance of random effects respectively. 
 
 Firstly, we obtained the names of each of the eight cleaned spreadsheets via the 
 `excel_sheets` function. We then used `lapply` to save each individual sheet as a tibble 
@@ -84,10 +86,13 @@ the three variables:
 5. Concentration of Treatment x Treatment Type x Cell Type
 
 We compared these three models by their residuals vs fitted plots, AIC, RMSE, and $R^2$, using the 
-`performance` [@per2021]  package.
+`performance` [@per2021]  package. We also ensured that the gene line random effect was significant for each model via the `ranova` function in the `lmerTest` [@lt2017] package.
+
+{{< pagebreak >}}
 
 # Results
 Upon looking at the residuals vs fitted plots, only the second and fifth models satisfied the assumption of homoscedasticity, so we discarded the other models. The plot for the second model is shown in Figure @fig-m2res, and is very similar to that of the fifth model, hence why it is not shown. 
+
 ```{r, echo=FALSE}
 #| label: fig-m2res
 #| fig-cap: Residuals versus fitted plot for the second model, which varies intercept by gene line and considers interaction between concentration of treatment and treatment type. We see there is random scattering of the residuals, satisfying the assumption of homoscedasticity.
@@ -96,6 +101,7 @@ knitr::include_graphics(here::here("figs",
 ```
 
 @fig-comp shows the comparison of the Root Mean Square Error (RMSE) metric, $R^2$ metric, and AIC metric for our two models, as well as their degrees of freedom. We have chosen Model 2, since it has fewer degrees of freedom, and is only slightly different from Model 5. 
+
 ```{r, echo=FALSE}
 #| label: fig-comp
 #| fig-cap: Quantitative metrics for the two models. We see that the three-way interaction model has a much lower AIC than the Concentration x Treatment model, but the RMSE and $R^2$ are both quite similar. Given that the three-way interaction model has more degrees of freedom, we have chosen the Concentration x Treatment model.
@@ -104,31 +110,49 @@ knitr::include_graphics(here::here("tabs",
                                   "2023-05-08-mixed-effects/model-metrics.png"))
 ```
 
+@fig-ranova shows the significance of the gene line mixed effects term in the chosen second model. All models had significant interaction terms at the 5% level, so this was not a deciding factor in the chosen model.
+
+```{r, echo=FALSE}
+#| label: fig-ranova
+#| fig-cap: ANOVA table showing difference in metrics for the second model with and without the gene line ramdom effect. We see that the gene line random effect is significant.
+
+knitr::include_graphics(here::here("tabs", 
+                                  "2023-05-08-mixed-effects/m2-ranova.png")) 
+```
+
 @fig-plot shows the fit of the linear mixed effect model to the data, separated by cell type.
+
 ```{r, echo=FALSE}
 #| label: fig-plot
 #| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42. 
-#| width: 80%
+#| width: 40%
+
 knitr::include_graphics(here::here("figs", 
-                                   "2023-05-08-mixed-effects/model-plot.pdf"))
+                                   "2023-05-08-mixed-effects/model-plot.pdf"),
+                        dpi=200)
 ```
 
 @fig-coef shows the coefficients of our final model.
+
 ```{r, echo=FALSE}
 #| label: fig-coef
-#| fig-cap: Coefficients of the chosen model. We notice the variation in intercept across gene lines is not particularly large, with the exception of Rza and xpo, which fall out of the 10-13 gene expression units that the other gene lines satisfy. The slope is just under 3 gene expression units, we subtract almost 5 units from the intercept if placebo treatment is used and roughly 3.3 units if we apply treatment to a Wild Type cell. We also subtract 1.9 units from the the slope if placebo treatment is used, indicating that 101 Type cells with Activating Factor 42 applied exhibit the greatest gene expression.
+#| fig-cap: Coefficients of the chosen model. We notice the variation in intercept across gene lines is not particularly large, with the exception of Rza and xpo, which fall out of the 10-13 gene expression units that the other gene lines satisfy. The slope is just under 3 gene expression units. We subtract almost 5 units from the intercept if placebo treatment is used and roughly 3.3 units if we apply treatment to a Wild Type cell. We also subtract 1.9 units from the the slope if placebo treatment is used, indicating that 101 Type cells with Activating Factor 42 applied exhibit the greatest gene expression.
 
 knitr::include_graphics(here::here("tabs", 
                                   "2023-05-08-mixed-effects/m2-coefs.png"))
 ```
 
+{{< pagebreak >}}
+
 # Discussion
-From @fig-plot, we see that applying Activating Factor 42 increases the slope, so for an increase of 1 mg/mL of treatment, gene expression subsequently increases for this treatment. Similarly, we mostly see greater gene expression for 101 Type Cells, also evident by the subtractive term in @fig-coef. The bNo and CsE gene lines have the most variability about the line of best fit from our model, but other gene lines are fitted more accurately. This could likely be due to the fact that the placebo treatment has limited effect on gene expression, so this is simply natural variation.
+From @fig-plot, we see that applying Activating Factor 42 increases the slope, so for an increase of 1 mg/mL of treatment, gene expression subsequently increases for this treatment by a value of approximately 3 units at most. Similarly, we mostly see greater gene expression for 101 Type Cells, also evident by the subtractive term in @fig-coef. The bNo and CsE gene lines have the most variability about the line of best fit from our model, but other gene lines are fitted more accurately. This could likely be due to the fact that the placebo treatment has limited effect on gene expression, so this is simply natural variation.
 
 The chosen model has an RMSE of approximately $1.49$ gene expression units, which is smaller than the 
-mean gene expression of $17.53$, and a high $R^2$ value of $97.9\%$, meaning just under $98\%$ of the 
+and a high $R^2$ value of $97.9\%$, meaning just under $98\%$ of the 
 variation in gene expression is explained by our model. This could also be indicative of overfitting. To further justify the validity of the model, error bounds on the equipment used to measure gene expression should be provided so they can be 
 accounted for by the model.
+
+{{< pagebreak >}}
 
 # Bibliograhy
 
