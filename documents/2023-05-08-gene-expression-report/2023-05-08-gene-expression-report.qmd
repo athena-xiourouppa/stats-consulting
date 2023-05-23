@@ -33,6 +33,7 @@ being imported into RStudio[^1]. We did the following in Excel:
 * Shifted data cells to top-left corner to avoid blank rows when reading into R
 * Made cell line and treatment type names consistent
 * Removed cell line and treatment type names from spreadsheet and copied separately. 
+
 From there, we saved this as a new spreadsheet.
 
 To import and analyse the data in R [@r2022], we used the packages `tidyverse` [@tidy2019],
@@ -47,7 +48,7 @@ each experiment, we then renamed the sheets so they had the format "GL-[Gene Lin
 same treatment and cell type, but the gene lines in these cases still differ, so they are 
 not true replications.
 
-There was a missing value in the JZC gene line trial, which we imputed with the mean value 
+There was a missing value in the fUg gene line trial, which we imputed with the mean value 
 of the remaining ten values. Finally, we saved a cleaned version of the data as a `.csv` file 
 for future use.
 
