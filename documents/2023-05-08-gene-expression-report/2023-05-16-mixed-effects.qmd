@@ -234,13 +234,17 @@ will choose this model. However, we can see that there is a minute difference in
 To demonstrate the fit of our model to our data, we plot the regression against the data points, separating by cell type for clarity, shown in Figure @fig-m5fit:
 ```{r}
 #| label: fig-m5fit
-#| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points. There is a better fit on the gene lines that used Activating Factor 42 as the applied treatment, compared with the Placebo.
+#| fig-cap: Plots showing the increase in gene expression as concentration of activating factor increases, separated by replication. We see that the Wild Type cells have a lower starting intercept value. We have also labelled the gene line for each set of eleven points. There is a better fit on the gene lines that used Activating Factor 42 as the applied treatment, compared with the Placebo.
 
 genes |> 
-  ggplot(aes(x=conc, y=gene_expression, color=treatment, shape=cell_type)) +
+  ggplot(aes(x=conc, y=gene_expression, color=treatment, shape=cell_type,
+             label=ifelse(conc==10, as.character(gene_line),''))) +
   geom_point() +
   geom_line(aes(y=predict(m5))) +
-  facet_wrap(~ gene_line, scales="free") +
+  geom_label_repel(nudge_x = 2,
+                 direction = "y",
+                 show.legend = FALSE) +
+  facet_wrap(~ trial_number, scales="free") +
   labs(x = "Concentration (mg/mL)",
        y = "Gene Expression",
        color = "Treatment",

@@ -151,7 +151,7 @@ plot(m5)
 
 compare_performance(m2, m5) |>
   select(c(AIC, R2_conditional, RMSE)) |> 
-  rename("R2" = "R2_conditional") |> 
+  rename("R Squared" = "R2_conditional") |> 
   add_column(Model=c("Concentration x Treatment", 
                  "Concentration x Treatment x Cell Type"),
              .before = "AIC") |> 
@@ -199,15 +199,16 @@ anova(m5) |>
   )
 ```
 
-@fig-plot shows the fit of the linear mixed effect model to the data, separated by gene line.
+@fig-plot shows the fit of the linear mixed effect model to the data, separated by gene line and replication number.
 
 ```{r, echo=FALSE}
 #| label: fig-plot
-#| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42. 
+#| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. The plots are divided by their replication number. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42. 
 #| fig-size: 300
 
 knitr::include_graphics(here::here("figs", "2023-05-08-mixed-effects/model-plot.pdf"))
 ```
+
 @tbl-fixed and @tbl-rand shows the coefficients of the fixed and random effects for our final model, respectively.
 
 ```{r, echo=FALSE}
@@ -245,7 +246,7 @@ In @fig-plot, the bNo and CsE gene lines have the most variability about the lin
 As seen in @tbl-comp, the chosen model has an RMSE of approximately $1.49$ gene expression units, which is smaller than the 
 and a high $R^2$ value of $97.9\%$, meaning just under $98\%$ of the 
 variation in gene expression is explained by our model. This could also be indicative of overfitting. To further justify the validity of the model, error bounds on the equipment used to measure gene expression should be provided so they can be 
-accounted for by the model.
+accounted for by the model. Additional replications of the same treatment and cell type conditions over the same concentration range would also be ideal.
 
 {{< pagebreak >}}
 
