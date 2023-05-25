@@ -11,64 +11,66 @@ spreadsheet Karl Berator provided on the 1st of March, 2023, located in
 # Excel Cleaning
 Before importing the spreadsheet into R, we:
 
-* deleted the figures on pages `GL-CsE` and `GL-bNo`
-* removed the summary statistics on page `GL-CsE`
-* shifted data cells to top-left corner to avoid blank rows when reading into R
-* made cell line and treatment type names consistent
-* removed cell line and treatment type names from spreadsheet and copied separately.
+* Deleted the figures on pages `GL-CsE` and `GL-bNo`
+* Removed the summary statistics on page `GL-CsE`
+* Shifted data cells to top-left corner to avoid blank rows when reading into R
+* Made cell line and treatment type names consistent
+* Removed cell line and treatment type names from spreadsheet and copied separately.
 
 # R Cleaning
-We now read the spreadsheet `modified-WTF-IISfD data.xlsx` under `data` into R:
-```{r, results=FALSE}
-# Load necessary packages
+We load the necessary packages for creating tibbles, reading in Excel spreadsheets, 
+melting tibbles, and creating nicer tables, respectively:
+```{r}
 pacman::p_load(tidyverse, readxl, reshape2, gt)
+```
 
+We read in the spreadsheet `modified-WTF-IISfD data.xlsx` under `data` into R and obtain 
+the sheet names:
+```{r, results=FALSE}
 # Obtain names of sheets
 sheet_names <- excel_sheets(here::here("data/modified-WTF-IISfD-data.xlsx"))
 
 # Read in each sheet
 wtf_iisfd <- lapply(sheet_names, 
-                 function(n) read_excel(here::here("data/modified-WTF-IISfD-data.xlsx"),
+                 function(n) 
+                   read_excel(here::here("data/modified-WTF-IISfD-data.xlsx"),
                                         sheet=n))
+```
 
-# Create more useful names using data
+We then redefine these names to be more descriptive and apply them to the list of tibbles:
+```{r}
 better_names_gene <- c("GL-CsE-WT-P-1", "GL-bNo-WT-P-2",
                   "GL-JZC-WT-A42-1", "GL-fUg-WT-A42-2", 
                   "GL-jEK-C101-P-1", "GL-Hoe-C101-P-2",
                   "GL-Rza-C101-A42-1", "GL-xpo-C101-A42-2")
-better_names <- c("WT-P-1", "WT-P-2",
-                  "WT-A42-1", "WT-A42-2", 
-                  "C101-P-1", "C101-P-2",
-                  "C101-A42-1", "C101-A42-2")
-
-# Name sheets
-names(wtf_iisfd) <- better_names
-
-# Show tibble
-print(wtf_iisfd)
+names(wtf_iisfd) <- better_names_gene
 ```
 
-One trial has a missing value in the gene expression column. Firstly, we label it as NA, and then impute with the mean.
+The gene line fUg has a missing value, labelled as a -99 in the gene expression column. Firstly, we label it as NA, and then impute with the mean.
 ```{r}
-wtf_iisfd$`WT-A42-2`$gene_expression[6] <- NA
-wtf_iisfd$`WT-A42-2`$gene_expression[6] <- mean(wtf_iisfd$`WT-A42-2`$gene_expression,
-                                                na.rm=TRUE)
+wtf_iisfd$`GL-fUg-WT-A42-2`$gene_expression[6] <- NA
+wtf_iisfd$`GL-fUg-WT-A42-2`$gene_expression[6] <- 
+  mean(wtf_iisfd$`GL-fUg-WT-A42-2`$gene_expression,
+       na.rm=TRUE)
 ```
 
-We save the cleaned data as a `.csv` with the gene line inclusive names, for future use, in two forms. Firstly, as a series of tibbles:
+We save the cleaned list of tibbles as a `.csv` file:
 ```{r}
-grouped_trials_genes <- wtf_iisfd
-names(grouped_trials_genes) <- better_names_gene
-write.csv(grouped_trials_genes, here::here("data","clean-gene-WTF-IISfD-data.csv"))
+write.csv(wtf_iisfd, here::here("data","clean-gene-WTF-IISfD-data.csv"))
 ```
 
-Then, as a melted, singular tibble, where `L1` is the label of the gene type, cell type, activating factor, and trial number.
+We then take this tibble and melt it based on the concentration value, since the same 
+range is tested in each experiment. We remove the redundant `variable` column, and 
+relabel the `value` column to replace it, since we only have one response variable.
 ```{r}
-melted_genes <- grouped_trials_genes |> 
-  melt(id = "conc")
+melted_genes <- wtf_iisfd |> 
+  melt(id = "conc") |> 
+  select(-c(variable)) |> 
+  rename(gene_expression = value)
 ```
 
-We further split `L1` into separate columns and save the labels as new columns:
+We further split `L1` into separate columns and save the labels as new columns, removing 
+the `L1` column as it is no longer needed:
 ```{r}
 gene_line <- c()
 cell_type <- c()
@@ -84,8 +86,7 @@ for(i in 1:nrow(melted_genes)){
 }
 
 melted_genes <- melted_genes |> 
-  select(-c(L1, variable)) |> 
-  rename(gene_expression = value) |> 
+  select(-L1) |> 
   mutate(gene_line = gene_line,
          cell_type = cell_type,
          treatment = treatment,
@@ -97,129 +98,144 @@ Finally, we save this melted tibble as a `.csv` file for future use:
 write.csv(melted_genes, here::here("data", "melted-gene-WTF-IISfD-data.csv"))
 ```
 
-Since we are summarising and there are two trials per cell line and treatment, we merge the separated trial tibbles and take an average of gene expression for every concentration:
-```{r}
-WT_P <- right_join(wtf_iisfd$`WT-P-1`, wtf_iisfd$`WT-P-2`, by="conc") 
-WT_A42 <- right_join(wtf_iisfd$`WT-A42-1`, wtf_iisfd$`WT-A42-2`, by="conc")
-CT101_P <- right_join(wtf_iisfd$`C101-P-1`, wtf_iisfd$`C101-P-2`, by="conc") 
-CT101_A42 <- right_join(wtf_iisfd$`C101-A42-1`, wtf_iisfd$`C101-A42-2`, by="conc")
+# Creating Summary Statistics
+We wish to summarise the experiments performed to compare the effect of the two 
+treatments on the two different cell types. There are two trials per cell type 
+and treatment, so we filter the melted tibble by these values and save them 
+separately. Since there are four combinations total, to do this, we create a function:
 
-# Save into new list
-grouped_trials <- list(WT_P, WT_A42, CT101_P, CT101_A42)
-names(grouped_trials) <- c("WT_P", "WT_A42", "CT101_P", "CT101_A42")
-```
-
-# Tabular Summary
-We now summarise the average gene expression for every concentration.
 ```{r}
-for(i in 1:4){
-  grouped_trials[[i]] <-
-    grouped_trials[[i]] |> 
-    transmute(conc, 
-              mean_ge = rowMeans(across(-conc)), 
-              sd_ge = apply(across(-conc), 1, sd))
+get_mean_sd_ge <- function(cell, treat, data){
+  ### 
+  # Function that creates a tibble with the mean gene expression at each 
+  #   concentration level of treatment
+  ## Parameters
+  # cell: str
+  #   type of cell
+  # treat: str
+  #   type of treatment
+  # data: tibble
+  #   melted tibble of all experiments
+  ## Return
+  # summary_data: tibble
+  #   an 11x3 tibble containing the mean and standard deviation of 
+  #     gene expression for each concentration
+  
+  summary_data <- 
+    data |> 
+    filter(cell_type == cell & treatment == treat) |> 
+    group_by(conc) |>
+    summarise(mean_ge = mean(gene_expression),
+           sd_ge = sd(gene_expression))
+  
+  return(summary_data)
 }
-
-summary_trials <- tibble(conc = grouped_trials[[1]]$conc,
-                         WT_P_mean = grouped_trials[[1]]$mean_ge,
-                         WT_A42_mean = grouped_trials[[2]]$mean_ge,
-                         CT101_P_mean = grouped_trials[[3]]$mean_ge,
-                         CT101_A42_mean = grouped_trials[[4]]$mean_ge,
-                         WT_P_sd = grouped_trials[[1]]$sd_ge,
-                         WT_A42_sd = grouped_trials[[2]]$sd_ge,
-                         CT101_P_sd = grouped_trials[[3]]$sd_ge,
-                         CT101_A42_sd = grouped_trials[[4]]$sd_ge,)
-head(summary_trials)
 ```
 
-Create nicer table for Wild-Type cell summary using `gt`:
+We then apply this to the four combinations: Wild Type cell with placebo treatment, 
+101 Type cell with placebo treatment, Wild Type cell with Activating Factor 42, 
+and 101 Type cell with Activating Factor 42.
 ```{r}
-summary_trials |> 
-  select(c(conc, WT_P_mean, WT_A42_mean, WT_P_sd, WT_A42_sd)) |> 
+WT_P <- get_mean_sd_ge("WT", "P", melted_genes)
+CT101_P <- get_mean_sd_ge("C101", "P", melted_genes)
+WT_A42 <- get_mean_sd_ge("WT", "A42", melted_genes)
+CT101_A42 <- get_mean_sd_ge("C101", "A42", melted_genes)
+```
+
+To compare treatments for the same cell type, we create four tibbles containing 
+the mean and standard deviation for each treatment over all concentration levels 
+for a particular cell type, and vice versa for a treatment type:
+```{r}
+WT_trials <- right_join(WT_P, WT_A42, by="conc", suffix=c(".P", ".A42"))
+CT101_trials <- right_join(CT101_P, CT101_A42, by="conc", suffix=c(".P", ".A42"))
+P_trials <- right_join(WT_P, CT101_P, by="conc", suffix=c(".WT", ".CT101"))
+A42_trials <- right_join(WT_A42, CT101_A42, by="conc", suffix=c(".WT", ".CT101"))
+```
+
+We use `gt` to create a summary table for Wild Type cells with appropriate column names 
+and rounded gene expression values.
+```{r}
+WT_trials |> 
   gt() |> 
   cols_label(conc = "Concentration (mg/mL)", 
-             WT_P_mean = "Placebo", 
-             WT_A42_mean = "Activating Factor 42",
-             WT_P_sd = "Placebo",
-             WT_A42_sd = "Activating Factor 42") |> 
-  tab_header(title = md("**Summary of Gene Expression in Wild-Type Cells**")) |> 
-  fmt_number(columns = c(WT_P_mean, WT_A42_mean, WT_P_sd, WT_A42_sd),
-             decimals = 2) |> 
+             mean_ge.P = "Placebo", 
+             mean_ge.A42 = "Activating Factor 42",
+             sd_ge.P = "Placebo",
+             sd_ge.A42 = "Activating Factor 42") |> 
+  tab_header(title = md("**Summary of Gene Expression in Wild Type Cells**")) |> 
+  fmt_number(columns = c(mean_ge.P, mean_ge.A42, sd_ge.P, sd_ge.A42),
+              decimals = 2) |> 
   cols_align("center") |> 
-  tab_spanner(columns = c(WT_P_mean, WT_A42_mean),
-              label = "Average Gene Expression") |> 
-  tab_spanner(columns = c(WT_P_sd, WT_A42_sd),
-              label = "Standard Deviation of Gene Expression") |> 
+  tab_spanner(columns = c(mean_ge.P, mean_ge.A42),
+               label = "Average Gene Expression") |> 
+  tab_spanner(columns = c(sd_ge.P, sd_ge.A42),
+               label = "Standard Deviation of Gene Expression") |> 
   gtsave(here::here("tabs/2023-03-03-data-cleaning/wt-summary.png"))
-  
 ```
 
-Create nicer table for 101-Type cell summary using `gt`:
+We also do this for 101 Type cells:
 ```{r}
-summary_trials |> 
-  select(c(conc, CT101_P_mean, CT101_A42_mean, CT101_P_sd, CT101_A42_sd)) |> 
+CT101_trials |> 
   gt() |> 
   cols_label(conc = "Concentration (mg/mL)", 
-             CT101_P_mean = "Placebo", 
-             CT101_A42_mean = "Activating Factor 42",
-             CT101_P_sd = "Placebo", 
-             CT101_A42_sd = "Activating Factor 42",) |> 
-  tab_header(title = md("**Summary of Gene Expression in 101-Type Cells**")) |> 
-  fmt_number(columns = c(CT101_P_mean, CT101_A42_mean, CT101_P_sd, CT101_A42_sd),
-             decimals = 2) |> 
+             mean_ge.P = "Placebo", 
+             mean_ge.A42 = "Activating Factor 42",
+             sd_ge.P = "Placebo",
+             sd_ge.A42 = "Activating Factor 42") |> 
+  tab_header(title = md("**Summary of Gene Expression in 101 Type Cells**")) |> 
+  fmt_number(columns = c(mean_ge.P, mean_ge.A42, sd_ge.P, sd_ge.A42),
+              decimals = 2) |> 
   cols_align("center") |> 
-  tab_spanner(columns = c(CT101_P_mean, CT101_A42_mean),
-              label = "Average Gene Expression") |> 
-  tab_spanner(columns = c(CT101_P_sd, CT101_A42_sd),
-              label = "Standard Deviation of Gene Expression") |> 
-  gtsave(here::here("tabs/2023-03-03-data-cleaning/101-summary.png"))
-  
+  tab_spanner(columns = c(mean_ge.P, mean_ge.A42),
+               label = "Average Gene Expression") |> 
+  tab_spanner(columns = c(sd_ge.P, sd_ge.A42),
+               label = "Standard Deviation of Gene Expression") |> 
+  gtsave(here::here("tabs/2023-03-03-data-cleaning/wt-summary.png"))
 ```
 
-# Figures
-We now plot the summaries as line graphs for each cell line and treatment type:
+# Creating figures
+We now plot the summaries as line graphs for each cell line and treatment type. We do this 
+by creating a scatter plot of the mean gene expressions and adding a linear line of best fit.
 ```{r}
-# Treatment on Wild cells
-summary_trials |> 
+WT_trials |> 
   melt(id="conc") |> 
-  filter(str_detect(variable, "WT")) |> 
   filter(str_detect(variable, "mean")) |> 
   ggplot(aes(conc, value, col=variable)) +
   geom_point() +
   geom_smooth(method="lm") +
   labs(x = "Concentration (mg/mL)",
        y = "Gene Expression",
-       title = "Effect of Activating Factor 42 on Gene Expression in \nWild-Type Cells"
+       title = "Effect of Activating Factor 42 on Gene Expression in \nWild Type Cells"
        ) +
   harrypotter::scale_color_hp_d("Ravenclaw",
                                 labels = c("Placebo", "Activating Factor 42"),
                                 name = "Treatment")
 ggsave(here::here("figs/2023-03-03-data-cleaning/wt-linegraph.png"))
 ```
+
 ```{r}
-# Treatment on 101 Cells
-summary_trials |> 
+CT101_trials |> 
   melt(id="conc") |> 
-  filter(str_detect(variable, "CT101")) |> 
   filter(str_detect(variable, "mean")) |> 
   ggplot(aes(conc, value, col=variable)) +
   geom_point() +
   geom_smooth(method="lm") +
   labs(x = "Concentration (mg/mL)",
        y = "Gene Expression",
-       title = "Effect of Activating Factor 42 on Gene Expression in \n101-Type Cells"
+       title = "Effect of Activating Factor 42 on Gene Expression in \n101 Type Cells"
        ) +
-    harrypotter::scale_color_hp_d("Gryffindor",
+  harrypotter::scale_color_hp_d("Ravenclaw",
                                 labels = c("Placebo", "Activating Factor 42"),
                                 name = "Treatment")
 ggsave(here::here("figs/2023-03-03-data-cleaning/101-linegraph.png"))
 ```
+
 We also display the spread of values for each cell line and treatment combination
+
 ```{r}
 # Placebo on cells
-summary_trials |> 
+P_trials |> 
   melt(id="conc") |> 
-  filter(str_detect(variable, "P")) |> 
   filter(str_detect(variable, "mean")) |> 
   ggplot(aes(conc, value, col=variable)) +
   geom_boxplot() +
@@ -235,9 +251,8 @@ ggsave(here::here("figs/2023-03-03-data-cleaning/placebo-boxplot.png"))
 
 ```{r}
 # A42 on cells
-summary_trials |> 
+A42_trials |> 
   melt(id="conc") |> 
-  filter(str_detect(variable, "A42")) |> 
   filter(str_detect(variable, "mean")) |> 
   ggplot(aes(conc, value, col=variable)) +
   geom_boxplot() +
@@ -253,9 +268,8 @@ ggsave(here::here("figs/2023-03-03-data-cleaning/a42-boxplot.png"))
 
 ```{r}
 # Treatment on WT cells
-summary_trials |> 
+WT_trials |> 
   melt(id="conc") |> 
-  filter(str_detect(variable, "WT")) |> 
   filter(str_detect(variable, "mean")) |> 
   ggplot(aes(conc, value, col=variable)) +
   geom_boxplot() +
@@ -271,9 +285,8 @@ ggsave(here::here("figs/2023-03-03-data-cleaning/wt-boxplot.png"))
 
 ```{r}
 # Treatment on 101 cells
-summary_trials |> 
+CT101_trials |> 
   melt(id="conc") |> 
-  filter(str_detect(variable, "CT101")) |> 
   filter(str_detect(variable, "mean")) |> 
   ggplot(aes(conc, value, col=variable)) +
   geom_boxplot() +

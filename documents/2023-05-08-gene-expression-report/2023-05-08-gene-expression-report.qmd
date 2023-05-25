@@ -56,9 +56,8 @@ to work with tibbles, import an Excel spreadsheet, melt tibbles, create tables, 
 Firstly, we obtained the names of each of the eight cleaned spreadsheets via the 
 `excel_sheets` function. We then used `lapply` to save each individual sheet as a tibble 
 and applied the corresponding name to each one. To keep track of the parameters used in 
-each experiment, we then renamed the sheets so they had the format "GL-[Gene Line]-[Cell Type]-[Treatment]-[Trial]". The term 'Trial' is used loosely here to refer to experiments with the
-same treatment and cell type, but the gene lines in these cases still differ, so they are 
-not true replications.
+each experiment, we then renamed the sheets so they had the format "GL-[Gene Line]-[Cell Type]-[Treatment]-[Trial]". The term 'Trial' is used here to refer to experiments with the
+same treatment and cell type.
 
 There was a missing value in the fUg gene line trial, which we imputed with the mean value 
 of the remaining ten values. Finally, we saved a cleaned version of the data as a `.csv` file 
@@ -116,7 +115,8 @@ the three variables as fixed effects:
 5. Concentration of Treatment x Treatment Type x Cell Type
 
 We compared these three models by their residuals vs fitted plots, AIC, RMSE, and $R^2$, using the 
-`performance` [@per2021]  package. We also ensured that the gene line random effect was significant for each model via the `ranova` function in the `lmerTest` [@lt2017] package and .
+`performance` [@per2021]  package. We also ensured that the gene line random effect was significant for each model via the `ranova` function in the `lmerTest` [@lt2017] package and that the fixed effects 
+were significant using the standard `anova` function.
 
 {{< pagebreak >}}
 
@@ -142,12 +142,11 @@ m5 <- lmer(gene_expression ~
 plot(m5)
 ```
 
-@tbl-comp shows the comparison of the Root Mean Square Error (RMSE) metric, $R^2$ metric, and AIC metric for our two models,. We have chosen Model 5, since it has a much lower AIC than Model 2.
+@tbl-comp shows the comparison of the Root Mean Square Error (RMSE) metric, $R^2$ metric, and AIC metric for our two models. We have chosen Model 5, since it has a much lower AIC than Model 2.
 
 ```{r, echo=FALSE}
 #| label: tbl-comp
-#| tbl-cap: Quantitative metrics for the two models. We see that the three-way interaction model has a much lower AIC than the Concentration x Treatment model, but the RMSE and R squared are both quite similar. Given that the three-way interaction model has more degrees of freedom, we have chosen the Concentration x Treatment model.
-#| tbl-cap-location: top
+#| tbl-cap: Quantitative metrics for the two models. We see that the three-way interaction model has a much lower AIC than the Concentration x Treatment model, but the RMSE and R squared are both quite similar. 
 
 compare_performance(m2, m5) |>
   select(c(AIC, R2_conditional, RMSE)) |> 
@@ -159,7 +158,7 @@ compare_performance(m2, m5) |>
   fmt_number(decimals = 4)
 ```
 
-@tbl-ranova shows the significance of the gene line mixed effects term in the chosen fifth model. All models had significant interaction terms at the 5% level, so this was not a deciding factor in the chosen model.
+@tbl-ranova shows the significance of the gene line random effect term in the chosen fifth model. All models had significant random effects at the 5% level, so this was not a deciding factor for choosing a model.
 
 ```{r, echo=FALSE}
 #| label: tbl-ranova
@@ -203,7 +202,7 @@ anova(m5) |>
 
 ```{r, echo=FALSE}
 #| label: fig-plot
-#| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. The plots are divided by their replication number. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42. 
+#| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. The plots are divided by their replication number. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42.
 #| fig-size: 300
 
 knitr::include_graphics(here::here("figs", "2023-05-08-mixed-effects/model-plot.pdf"))
@@ -241,10 +240,10 @@ ranef(m5)$gene_line |>
 # Discussion
 From @tbl-fixed, we see that as concentration of treatment increases, gene expression also increases. The slope is maximised when Activating Factor 42 is used on a 101 Type cell, but using placebo treatment or Wild Type cells decreases both the slope and the intercept, and therefore gene expression. In @tbl-rand, we see that most gene lines show consistency in their intercept, indicating that the variation between them is not high, however the Rza and xpo lines have significantly lower and higher intercepts, and therefore gene expressions, respectively.
 
-In @fig-plot, the bNo and CsE gene lines have the most variability about the line of best fit from our model, but other gene lines are fitted more accurately. This could likely be due to the fact that the placebo treatment has less of an effect on gene expression, so this is simply natural variation.
+In @fig-plot, the bNo, and CsE gene lines have the most variability about the line of best fit from our model, but other gene lines are fitted more accurately. This could likely be due to the fact that the placebo treatment has less of an effect on gene expression, so this is simply natural variation in 
+gene expression over time.
 
-As seen in @tbl-comp, the chosen model has an RMSE of approximately $1.49$ gene expression units, which is smaller than the 
-and a high $R^2$ value of $97.9\%$, meaning just under $98\%$ of the 
+As seen in @tbl-comp, the chosen model has an RMSE of approximately $1.49$ gene expression units, and a high $R^2$ value of $97.9\%$, meaning just under $98\%$ of the 
 variation in gene expression is explained by our model. This could also be indicative of overfitting. To further justify the validity of the model, error bounds on the equipment used to measure gene expression should be provided so they can be 
 accounted for by the model. Additional replications of the same treatment and cell type conditions over the same concentration range would also be ideal.
 
