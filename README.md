@@ -32,8 +32,8 @@ If opening in RStudio, please use the included project `collaboration-project.Rp
    * `gene_plot.pdf` (Reference figure to match for plot adjustment on 3/4/2023)
 * tabs (produced tables)
     * data cleaning
-       * `101-summary.html` (Summary statistics for 101 Type cells)
-       * `wt-summary.html` (Summary statistics for Wild Type cells)
+       * `101-summary.png` (Summary statistics for 101 Type cells)
+       * `wt-summary.png` (Summary statistics for Wild Type cells)
 
 ## Tasks Performed (`YYYY-MM-DD-key-descriptor`)
 ### Data Cleaning (`2023-03-03-gene-expression`)
@@ -48,7 +48,29 @@ concentration of either a saline (placebo) solution or Activating Factor 42 on g
 This version was saved as `modified-WTF-IISfD-data.xlsx`. We used `readxl` to import the spreadsheet into R, and performing the following procedures:
 * Obtained names of Excel sheets to label each of the eight experiment tibbles
 * Imputed a missing value of gene expression (indicated by a -99) in the fUg gene line with the mean gene expression of that experiment 
-We saved this as a `.csv` file (`clean-gene-WTF-IISfD-data.csv`). We also 
+
+We saved this as a `.csv` file (`clean-gene-WTF-IISfD-data.csv`). We also created a 
+`.csv` file of a melted tibble (`modified-gene-WTF-IISfD-data.csv`), using concentration as an ID column 
+since this is consistent across all experiments. The label of each sheet was separated 
+into its components of gene line, cell type, treatment type, and trial number using `str_split`.
+
+From there, we created four smaller tibbles that summarised the mean and standard deviation of 
+gene expression in cell type groups and treatment groups, using a function to more efficiently 
+filter the larger tibble by these factors and generate the summary statistics.
+
+Using `gt`, we created a summary table for each cell type, and saved these as `.png` files 
+for use in Karl's PowerPoint (`101-summary.png` and `wt-summary.png`). 
+
+We also created two 
+line graphs (`101-linegraph.png` and `wt-linegraph.png`) that show a linear line of best 
+fit on the gene expression vs concentration data, colour-coded by treatment type. 
+
+Finally, we created four box plots showing the spread of gene expression within cell type 
+groups, and within treatment groups (`wt-boxplot.png`, `101-boxplot.png`, `placebo-boxplot.png`, 
+and `a42-boxplot.png`).
+
+These two tables and six figures were added to a PowerPoint (`2023-03-03-gene-expression-data.pptx`) 
+for Karl to use in his presentation.
 
 ### Plot Adjustment (`2023-04-03-plot-adjustment`)
 We adjusted the gene comparison plot sent by Karl on 3/4 to use Times New Roman 
