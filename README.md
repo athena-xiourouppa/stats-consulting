@@ -8,33 +8,32 @@ If opening in RStudio, please use the included project `collaboration-project.Rp
    * `melted-gene-WTF-IISfD-data.csv` (melted tibble with all gene experiments for plotting)
    * `modified-WTF-IISfD-data.xlsx` (modified version of raw spreadsheet imported into R to create the above two `.csv` files)
 * documents (Quarto files detailing specific processes, contained in folders for neater compilation)
-*   `2023-03-03-data-cleaning` (data cleaning and EDA of gene expression experiments)
-*   `2023-04-03-plot-adjustment` (replication of plot desired by Karl)
-*   `2023-05-01-sample-size-calculation` (calculation of necessary sample size for desired power in experiment)
-*   `2023-05-08-predictive-model` (analysis of gene expression data to create predictive model)
-*   `2023-05-16-imrad` (IMRaD report describing developed predictive model)
+  * `2023-03-03-data-cleaning` (data cleaning and EDA of gene expression experiments)
+  * `2023-04-03-plot-adjustment` (replication of plot desired by Karl)
+  * `2023-05-01-sample-size-calculation` (calculation of necessary sample size for desired power in experiment)
+  * `2023-05-08-predictive-model` (analysis of gene expression data to create predictive model)
+  * `2023-05-16-imrad` (IMRaD report describing developed predictive model)
 * exports (files sent to Karl, excluding pdfs of compiled Quarto documents in the above folder)
-*   `2023-03-03-gene-expression-data.pptx` (PowerPoint of summary tables and figures from gene expression EDA)
+  * `2023-03-03-gene-expression-data.pptx` (PowerPoint of summary tables and figures from gene expression EDA)
 * figs (produced figures)
-*   data cleaning
-*       `101-boxplot.png` (Box plot of gene expression in 101 Type cells separated by treatment type)
-*       `101-linegraph.png` (Scatter plot with linear line of best fit of gene expression vs concentration of treatment in 101 Type cells separated by treatment type)
-*       `a42-boxplot.png` (Box plot of gene expression using Activating Factor 42 separated by cell type)
-*       `placebo-boxplot.png`(Box plot of gene expression using placebo treatment separated by cell type)
-*       `wt-boxplot.png` (Box plot of gene expression in Wild Type cells separated by treatment type)
-*       `wt-linegraph.png` (Scatter plot with linear line of best fit of gene expression vs concentration of treatment in Wild Type cells separated by treatment type)
-*   plot adjustment
-*       `ge_tnr.zip` (Compressed version of `.tiff` replicating the figure sent by Karl on 4/3/2023)
-*   predictive model analysis and IMRaD
-*       
+   * data cleaning
+       * `101-boxplot.png` (Box plot of gene expression in 101 Type cells separated by treatment type)
+       * `101-linegraph.png` (Scatter plot with linear line of best fit of gene expression vs concentration of treatment in 101 Type cells separated by treatment type)
+       * `a42-boxplot.png` (Box plot of gene expression using Activating Factor 42 separated by cell type)
+       * `placebo-boxplot.png`(Box plot of gene expression using placebo treatment separated by cell type)
+       * `wt-boxplot.png` (Box plot of gene expression in Wild Type cells separated by treatment type)
+       * `wt-linegraph.png` (Scatter plot with linear line of best fit of gene expression vs concentration of treatment in Wild Type cells separated by treatment type)
+   * plot adjustment
+       * `ge_tnr.zip` (Compressed version of `.tiff` replicating the figure sent by Karl on 4/3/2023)
+   * predictive model analysis and IMRaD       
 * raw-data (data files given by Karl)
-*   `WTF-IISFD data.xlsx` (Excel spreadsheet of gene expression experiment data)
+   * `WTF-IISFD data.xlsx` (Excel spreadsheet of gene expression experiment data)
 * resources (reference files given by Karl)
-*   `gene_plot.pdf` (Reference figure to match for plot adjustment on 3/4/2023)
+   * `gene_plot.pdf` (Reference figure to match for plot adjustment on 3/4/2023)
 * tabs (produced tables)
-*    data cleaning
-*       `101-summary.html` (Summary statistics for 101 Type cells)
-*       `wt-summary.html` (Summary statistics for Wild Type cells)
+    * data cleaning
+       * `101-summary.html` (Summary statistics for 101 Type cells)
+       * `wt-summary.html` (Summary statistics for Wild Type cells)
 
 ## Tasks Performed (`YYYY-MM-DD-key-descriptor`)
 ### Data Cleaning (`2023-03-03-gene-expression`)
