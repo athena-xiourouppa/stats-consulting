@@ -4,9 +4,9 @@ If opening in RStudio, please use the included project `collaboration-project.Rp
 
 ## Folder Structure
 * data (modified data files)
-*   `clean-gene-WTF-IISfD-data.csv` (list of cleaned tibbles for the eight gene experiments)
-*   `melted-gene-WTF-IISfD-data.csv` (melted tibble with all gene experiments for plotting)
-*   `modified-WTF-IISfD-data.xlsx` (modified version of raw spreadsheet imported into R to create the above two `.csv` files)
+   * `clean-gene-WTF-IISfD-data.csv` (list of cleaned tibbles for the eight gene experiments)
+   * `melted-gene-WTF-IISfD-data.csv` (melted tibble with all gene experiments for plotting)
+   * `modified-WTF-IISfD-data.xlsx` (modified version of raw spreadsheet imported into R to create the above two `.csv` files)
 * documents (Quarto files detailing specific processes, contained in folders for neater compilation)
 *   `2023-03-03-data-cleaning` (data cleaning and EDA of gene expression experiments)
 *   `2023-04-03-plot-adjustment` (replication of plot desired by Karl)
