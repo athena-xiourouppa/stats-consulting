@@ -29,7 +29,7 @@ If opening in RStudio, please use the included project `collaboration-project.Rp
 * raw-data (data files given by Karl)
    * `WTF-IISFD data.xlsx` (Excel spreadsheet of gene expression experiment data)
 * resources (reference files given by Karl)
-   * `gene_plot.pdf` (Reference figure to match for plot adjustment on 3/4/2023)
+   * `gene_plot.png` (Reference figure to match for plot adjustment on 3/4/2023)
 * tabs (produced tables)
     * data cleaning
        * `101-summary.png` (Summary statistics for 101 Type cells)
@@ -73,8 +73,20 @@ These two tables and six figures were added to a PowerPoint (`2023-03-03-gene-ex
 for Karl to use in his presentation.
 
 ### Plot Adjustment (`2023-04-03-plot-adjustment`)
-We adjusted the gene comparison plot sent by Karl on 3/4 to use Times New Roman 
-font and formatted it as a `.tiff` file.
+On 3/4/2023, Karl emailed a reference plot (see  `gene_plot.png`), requesting that it be replicated 
+with Times New Roman font and saved as a `.tiff` file.
+
+To do this, we read in the melted gene expression data and created two plots for each cell type 
+of gene expressionvs concentration for Wild Type cells, coloured by treatment. Each plot used two 
+specific colours from the Ravenclaw palette of the `harrypotter` package. We also added labels 
+for the gene lines to the end data points of each experiment. Furthermore, we used the black and 
+white `ggplot` theme to match the given picture. Using the `extrafont` package, we also set the 
+font family to "Times".
+
+Once each individual graph was created, we used `patchwork` to merge them by their identical 
+legends, and add letter labels.
+
+We then exported the figure as a `.tiff` file of size 9 in x 6 in with a resolution of 500, which is included in compressed form in the repository.
 
 ### Sample Size Calculation (`2023-05-01-sample-size-calculation`)
 We calculated a sample size for Karl's experiment grant based on $R^2$, power, and
