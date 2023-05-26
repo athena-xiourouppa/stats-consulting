@@ -17,27 +17,35 @@ If opening in RStudio, please use the included project `collaboration-project.Rp
   * `2023-03-03-gene-expression-data.pptx` (PowerPoint of summary tables and figures from gene expression EDA)
 * figs (produced figures)
    * data cleaning
-       * `101-boxplot.png` (Box plot of gene expression in 101 Type cells separated by treatment type)
-       * `101-linegraph.png` (Scatter plot with linear line of best fit of gene expression vs concentration of treatment in 101 Type cells separated by treatment type)
-       * `a42-boxplot.png` (Box plot of gene expression using Activating Factor 42 separated by cell type)
-       * `placebo-boxplot.png`(Box plot of gene expression using placebo treatment separated by cell type)
-       * `wt-boxplot.png` (Box plot of gene expression in Wild Type cells separated by treatment type)
-       * `wt-linegraph.png` (Scatter plot with linear line of best fit of gene expression vs concentration of treatment in Wild Type cells separated by treatment type)
+       * `101-boxplot.png` (box plot of gene expression in 101 Type cells separated by treatment type)
+       * `101-linegraph.png` (scatter plot with linear line of best fit of gene expression vs concentration of treatment in 101 Type cells separated by treatment type)
+       * `a42-boxplot.png` (box plot of gene expression using Activating Factor 42 separated by cell type)
+       * `placebo-boxplot.png`(box plot of gene expression using placebo treatment separated by cell type)
+       * `wt-boxplot.png` (box plot of gene expression in Wild Type cells separated by treatment type)
+       * `wt-linegraph.png` (scatter plot with linear line of best fit of gene expression vs concentration of treatment in Wild Type cells separated by treatment type)
    * plot adjustment
-       * `ge_tnr.zip` (Compressed version of `.tiff` replicating the figure sent by Karl on 4/3/2023)
-   * predictive model analysis and IMRaD     
-       * `model-eda.png` (Scatter plot of gene expression vs concentration, coloured by treatment, 
+       * `ge_tnr.zip` (compressed version of `.tiff` replicating the figure sent by Karl on 4/3/2023)
+   * modelling     
+       * `m5-assumptions.png` (residuals vs fitted plot for chosen model)
+       * `model-eda.png` (scatter plot of gene expression vs concentration, coloured by treatment, 
        and separated by cell type)
+       * `model-plot.png` (line of best fit from mixed effects model on data, similar to above)
 * raw-data (data files given by Karl)
    * `WTF-IISFD data.xlsx` (Excel spreadsheet of gene expression experiment data)
 * resources (reference files given by Karl)
-   * `gene_plot.png` (Reference figure to match for plot adjustment on 3/4/2023)
+   * `gene_plot.png` (reference figure to match for plot adjustment on 3/4/2023)
 * tabs (produced tables)
     * data cleaning
-       * `101-summary.png` (Summary statistics for 101 Type cells)
-       * `wt-summary.png` (Summary statistics for Wild Type cells)
+       * `101-summary.png` (summary statistics for 101 Type cells)
+       * `wt-summary.png` (summary statistics for Wild Type cells)
+    * modelling
+       * `m5-anova.png` (ANOVA table for fixed effects in final model)
+       * `m5-fixef.png` (coefficients of fixed effects in final model)
+       * `m5-ranef.png` (coefficients of random effects in final model)
+       * `m5-ranova.png` (ANOVA table for random effect in final model)
+       * `model-metrics.png` (AIC, $R^2$, and RMSE for the second and fifth [final] models)
 
-## Tasks Performed (`YYYY-MM-DD-key-descriptor`)
+## Tasks Performed (`YYYY-MM-DD-description`)
 ### Data Cleaning (`2023-03-03-gene-expression`)
 Karl sent a spreadsheet (`WTF-IISFD data.xlsx`) of lab data measuring relationship between
 concentration of either a saline (placebo) solution or Activating Factor 42 on gene expression in both Wild-Type and 101-Type cells. Before importing this data into R, we performed the following corrections in Excel:
