@@ -205,7 +205,7 @@ anova(m5) |>
 #| fig-cap: Plot of gene expression versus concentration of treatment factor for the two cell types and two treatment factors, indicated by shape and colour, respectively. We have also labelled the gene lines at their final observations. The plots are divided by their replication number. We notice that the Wild Type cells have a lower starting intercept compared with the 101 Type cells. The linear model fits the Wild Type cells more accurately than the 101 Type cells, and the same applies for the placebo treatment versus than Activating Factor 42.
 #| fig-size: 300
 
-knitr::include_graphics(here::here("figs", "2023-05-08-mixed-effects/model-plot.pdf"))
+knitr::include_graphics(here::here("figs", "2023-05-08-modelling/model-plot.png"))
 ```
 
 @tbl-fixed and @tbl-rand shows the coefficients of the fixed and random effects for our final model, respectively.

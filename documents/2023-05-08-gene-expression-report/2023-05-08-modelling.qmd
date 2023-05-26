@@ -9,11 +9,15 @@ gene expression data.
 
 # Load packages and data
 We load the necessary packages for working with data frames, generating mixed effects
-models, labeling graphs, and colouring graphs. We also read in the melted tibble from our previous
-data cleaning.
+models, labeling graphs, colouring graphs, saving tables, obtaining model metrics, 
+creating tables, and testing the significance of random effects, respectively. 
 ```{r}
-pacman::p_load(tidyverse, lme4, ggrepel, paletteer, vip, kableExtra, 
+pacman::p_load(tidyverse, lme4, ggrepel, paletteer, kableExtra, 
                performance, gt, lmerTest)
+```
+
+We also read in the melted tibble from our previous data cleaning.
+```{r}
 genes <- read.csv(here::here("data", "melted-gene-WTF-IISfD-data.csv"))
 head(genes)
 ```
@@ -49,7 +53,7 @@ genes |>
   theme(legend.position="bottom") +
   paletteer::scale_color_paletteer_d("tvthemes::rickAndMorty",
                                      labels=c("Activating Factor 42", "Placebo"))
-ggsave(here::here("figs/2023-05-08-mixed-effects/model-eda.pdf"))
+ggsave(here::here("figs/2023-05-08-modelling/model-eda.png"))
 ```
 
 ## Model 1: No Interaction
@@ -67,9 +71,11 @@ We will check the significance of the gene line random effects and other fixed e
 ```{r}
 ranova(m1)
 ```
+
 ```{r}
 anova(m1)
 ```
+
 All terms are significant at a 5% level except for the `cell_type` term.
 
 Figure @fig-m1 shows the assumption checking for the model.
@@ -97,6 +103,7 @@ ranova(m2)
 ```{r}
 anova(m2)
 ```
+
 All terms are significant except for the treatment and cell type terms at the 5% level, however the interaction term Concentration x Treatment is significant, so only cell type is insignificant.
 
 Figure @fig-m2 shows the assumption checking for the model.
@@ -121,6 +128,7 @@ We will check the significance of the gene line random effects and other fixed e
 ```{r}
 ranova(m3)
 ```
+
 ```{r}
 anova(m3)
 ```
@@ -147,6 +155,7 @@ We will check the significance of the gene line random effect at a 5% level, whi
 ```{r}
 ranova(m4)
 ```
+
 ```{r}
 anova(m4)
 ```
@@ -183,8 +192,9 @@ ranova(m5) |>
     columns = `Pr(>Chisq)`,
     fn = function(x) x > 0 & x <= 0.05,
   ) |> 
-gtsave(here::here("tabs", "2023-05-08-mixed-effects/m5-ranova.png"))
+gtsave(here::here("tabs", "2023-05-08-modelling/m5-ranova.png"))
 ```
+
 ```{r}
 anova(m5) |> 
   select(c("F value", "Pr(>F)")) |> 
@@ -197,7 +207,7 @@ anova(m5) |>
     columns = `Pr(>F)`,
     fn = function(x) x > 0 & x <= 0.05,
   ) |> 
-gtsave(here::here("tabs", "2023-05-08-mixed-effects/m5-anova.png"))
+gtsave(here::here("tabs", "2023-05-08-modelling/m5-anova.png"))
 ```
 Since the three-way interaction term is significant, all other predictors are significant here, as is the random effect.
 
@@ -209,7 +219,7 @@ plot(m5)
 ```
 
 ```{r, echo=FALSE}
-pdf(here::here("figs", "2023-05-08-mixed-effects/m5-assumptions.pdf"))
+pdf(here::here("figs", "2023-05-08-modelling/m5-assumptions.png"))
 plot(m5)
 dev.off()
 ```
@@ -225,7 +235,7 @@ compare_performance(m2, m5) |>
                  "Concentration x Treatment x Cell Type"),
              .before = "AIC") |> 
   gt() |> 
-  gtsave(here::here("tabs", "2023-05-08-mixed-effects/model-metrics.png"))
+  gtsave(here::here("tabs", "2023-05-08-modelling/model-metrics.png"))
 ```
 
 Since the fifth model with the three-way interaction term has a significantly lower AIC, we 
@@ -254,25 +264,30 @@ genes |>
   scale_shape(labels=c("101 Type Cell", "Wild Type Cell")) +
   paletteer::scale_color_paletteer_d("tvthemes::rickAndMorty",
                                      labels=c("Activating Factor 42", "Placebo"))
-ggsave(here::here("figs/2023-05-08-mixed-effects/model-plot.pdf"))
+ggsave(here::here("figs/2023-05-08-modelling/model-plot.png"))
 ```
 
 We also get the coefficients of our chosen model and save them for future use:
 ```{r}
-fixef(m5) |> 
+f <- fixef(m5)
+names(f)[1] <- "Intercept"
+
+f |> 
   as.data.frame() |> 
   gt(rownames_to_stub=TRUE) |> 
   fmt_number(decimals=4) |> 
-  cols_label("fixef(m5)" = "Coefficient") |> 
-  tab_stubhead(label="Term")
+  cols_label("f" = "Coefficient") |> 
+  tab_stubhead(label="Term") |> 
+  gtsave(here::here("tabs", "2023-05-08-modelling/m5-fixef.png"))
 ```
 
 ```{r}
 ranef(m5)$gene_line |> 
   gt(rownames_to_stub=TRUE) |> 
   fmt_number(decimals=4) |> 
-  tab_stubhead(label="Gene Line") 
-  
+  tab_stubhead(label="Gene Line") |> 
+  cols_label("(Intercept)"="Intercept") |> 
+  gtsave(here::here("tabs", "2023-05-08-modelling/m5-ranef.png"))
 ```
 
 
