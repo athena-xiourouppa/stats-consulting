@@ -97,7 +97,7 @@ font family to "Times".
 Once each individual graph was created, we used `patchwork` to merge them by their identical 
 legends, and add letter labels.
 
-We then exported the figure as a `.tiff` file of size 9 in x 6 in with a resolution of 500, which is included in compressed form in the repository.
+We then exported the figure as a `.tiff` file of size 9 in x 6 in with a resolution of 500, which is included in compressed form in the repository (`ge_tnr.zip`).
 
 ### Sample Size Calculation (`2023-05-01-sample-size-calculation`)
 We calculated a sample size for Karl's experiment grant based on $R^2$, power, and
