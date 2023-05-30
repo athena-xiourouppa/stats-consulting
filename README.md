@@ -79,6 +79,9 @@ Finally, we created four box plots showing the spread of gene expression within 
 groups, and within treatment groups (`wt-boxplot.png`, `101-boxplot.png`, `placebo-boxplot.png`, 
 and `a42-boxplot.png`).
 
+To prepaer the data for each figure, we melted the relevant smaller tibble by the concentration variable, used `str_detect` 
+to filter by the mean values of gene expression, before and then used `ggpsave` to export the figure.
+
 These two tables and six figures were added to a PowerPoint (`2023-03-03-gene-expression-data.pptx`) 
 for Karl to use in his presentation.
 
@@ -95,7 +98,7 @@ white `ggplot` theme to match the given picture. Using the `extrafont` package, 
 font family to "Times".
 
 Once each individual graph was created, we used `patchwork` to merge them by their identical 
-legends, and add letter labels.
+legends, place said legend at the bottom of the figure, and add letter labels.
 
 We then exported the figure as a `.tiff` file of size 9 in x 6 in with a resolution of 500, which is included in compressed form in the repository (`ge_tnr.zip`).
 
@@ -105,7 +108,7 @@ significance level desired. We did this using the `pwr` package, and by defining
 effect size $\mathcal{f}^2$ in terms of $R^2$, such that we could solve for the numerator degrees 
 of freedom $n-k-1$ of the F-statistic, and subsequently obtain $n$.
 
-### Predictive Model (`2023-05-08-predictive-model` and `2023-05-16-imrad`)
+### Predictive Model (`2023-05-08-predictive-model`)
 We created a predictive mixed-effects model for gene expression using the cleaned 
 data and wrote an accompanying report. Initially, we plotted gene expression vs 
 concentration for all gene lines, colouring by treatment, and separating by cell 
@@ -131,9 +134,9 @@ respectively. The assumption plot is saved as `m5-assumptions.png`.
 Since the second and fifth models were the only ones to satisfy the homoscedasticity 
 assumption, we further compared them by calculating their AIC values, $R^2$ values, 
 and RMSE values using the `performance` package. The fifth model had a significantly 
-lower AIC, so it was our chosen model. This output table is saved as `model-metrics.png`.
+lower AIC, so it was our chosen model. This comparative output table is saved as `model-metrics.png`.
 
-We plotted the line of best fit model on a graph similar to the EDA plot, by separated 
+We plotted the line of best fit for the model on a graph similar to the EDA plot, by separated 
 by replication number, with shape as a key for cell type (`model-plot.png`). We also obtained 
 the coefficient tables for the random and fixed effects, saved as `m5-ranef.png` and 
 `m5-fixef.png`, respectively. To avoid TeX compilation errors, for any values pertaining to the
